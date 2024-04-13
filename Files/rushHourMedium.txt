@@ -2,7 +2,7 @@
 CARTE 1
 6 7     //Num ligne et num colonne
 C7      //Emplacement sortie
-8
+8       //Nb min coups
 C2 C3   //Voiture rouge
 A1 A2   //Emplacement d'un véhicule
 B1 D1
