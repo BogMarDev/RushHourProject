@@ -32,6 +32,7 @@ typedef struct{
 }plateau;
 
 typedef struct {
+    coordonnee caseDebut;
     coordonnee caseArrivee;
     char symbole;
 }deplacement;
@@ -46,6 +47,17 @@ void flush_stdin_buffer(void){
         c = getchar();
     }while(c != '\n' && c != EOF);
 }
+
+/**
+ * \fn get_choice
+ * \brief get a character choose by the user
+*/
+char get_choice(void){
+    char c = -1;
+    scanf("%c", &c);
+    return c;
+}
+
 
 //Afficher
 void display_clear(void){
@@ -79,14 +91,19 @@ void afficher_regles(){
     printf("Enfin, vous constatez les conséquence de votre déplacement et adaptez vos futures actions\n\n");
 }
 
-void init_parking(plateau parking){
-    for(int indiceLigne = 0; indiceLigne < parking.nbLignes; indiceLigne++){
-        for(int indiceColonne = 0; indiceColonne < parking.nbColonnes; indiceColonne++){
-            parking.matrice[indiceLigne][indiceColonne] = (char) {0};
-        }
+void display_index_column(int columns_max){
+    for (int i = 0; i < columns_max; i++) {
+        printf("%d", i+1); //à adapter comment sera le plateau
     }
+    printf("\n");
 }
 
+void afficher_parking(plateau parking){
+    display_index_column(parking.nbColonnes);
+    //TRUC AVEC LA MATRICE
+}
+
+//Gameplay
 /** \fn modify_symbols
  *  \brief shift all boxes containing symbols by one of the left
  *  \param symbols : array with all symbols of the game
@@ -117,6 +134,56 @@ char tire_symbole_aleatoire(char symboles[TAILLE], int nb_symboles_restants){
     return symbole;
 }
 
+void init_parking_defaut(plateau parking){
+    //2. voiture Rouge
+    parking.nbLignes = 5;
+    parking.nbColonnes = 7;
+    parking.nbMinCoups = 2;
+    parking.sortie = (coordonnee) {'E', 7};
+    coordonnee debut = {'E', 2};
+    coordonnee fin = {'E', 3};
+    vehicule voitureRouge = {2, debut, fin, 'R'};
+    parking.listeVehicule[0] = &voitureRouge;
+
+    //3. camion n°1
+    debut.ligne = 'B';
+    debut.colonne = 1;
+    //case au milieu B2
+    fin.ligne = 'B';
+    fin.colonne = 3;
+    vehicule camion1 = {3, debut, fin, ' '};
+    parking.listeVehicule[1] = &camion1;
+
+    //4. camion n°2
+    debut.ligne = 'C';
+    debut.colonne = 5;
+    //case au milieu D5
+    fin.ligne = 'E';
+    fin.colonne = 5;
+    vehicule camion2 = {3, debut, fin, ' '};
+    parking.listeVehicule[2] = &camion2;
+
+    //5. voiture n°1
+    debut.ligne = 'A';
+    debut.colonne = 6;
+    fin.ligne = 'A';
+    fin.colonne = 7;
+    vehicule voiture = {2, debut, fin, ' '};
+    parking.listeVehicule[3] = &voiture;
+
+    for(int indice = 1, nb_symboles_restants = TAILLE; indice < NB_TOTAL_VEHICULE; indice++, nb_symboles_restants--) {
+        char symboles[TAILLE] = {'+', '-', '=', '?', '~', '$', '*', '#', '%', '{',
+                                 '&', '@', '^', '>', '<', '/', '(', ')', '[', ']'};
+        parking.listeVehicule[indice]->symbole = tire_symbole_aleatoire(symboles, nb_symboles_restants);
+    }
+
+    for(int indiceLigne = 0; indiceLigne < parking.nbLignes; indiceLigne++){
+        for(int indiceColonne = 0; indiceColonne < parking.nbColonnes; indiceColonne++){
+            parking.matrice[indiceLigne][indiceColonne] = (char) {0};
+        }
+    }
+}
+
 char ligne_utilisateur(){
     char deplacement_utilisateur = 0;
 
@@ -137,8 +204,7 @@ int colonne_utilisateur(){
         scanf("%d", &deplacement_utilisateur);
 
         if(deplacement_utilisateur >= INDICE_PREMIERE_COLONNE && deplacement_utilisateur <= INDICE_DERNIERE_COLONNE){
-            printf("Vous avez entré un numéro de colonne invalide. Vous devez entrer un numéro entre %d et %d\n",
-                   INDICE_PREMIERE_COLONNE, INDICE_DERNIERE_COLONNE);
+            printf("Vous avez entré un numéro de colonne invalide. Vous devez entrer un numéro entre %d et %d\n",INDICE_PREMIERE_COLONNE, INDICE_DERNIERE_COLONNE);
         }
     }while(deplacement_utilisateur >= INDICE_PREMIERE_COLONNE && deplacement_utilisateur <= INDICE_DERNIERE_COLONNE);
 
@@ -158,22 +224,7 @@ int case_contient_vehicule(plateau parking, coordonnee vehicule_a_deplacer){
     return contient_vehicule;
 }
 
-coordonnee saisie_vehicule_a_deplacer(plateau parking){
-    coordonnee emplacement = {0, 0};
-    do {
-        emplacement.ligne = ligne_utilisateur();
-        emplacement.colonne = colonne_utilisateur();
-
-        if(!case_contient_vehicule(parking, emplacement) ){
-            printf("Attention: vous avez entre une case qui ne contient pas de véhicule\n");
-            printf("Pour vouloir déplacer un véhicule, il faut que vous entriiez une case contenant un véhicule\n");
-        }
-    }while(!case_contient_vehicule(parking, emplacement) );
-
-    return emplacement;
-}
-
-coordonnee saisie_vehicule_a_deplacer(plateau parking){
+coordonnee saisie_coordonnee(plateau parking){
     coordonnee emplacement = {0, 0};
     do {
         emplacement.ligne = ligne_utilisateur();
@@ -186,6 +237,13 @@ coordonnee saisie_vehicule_a_deplacer(plateau parking){
     }while(case_contient_vehicule(parking, emplacement) );
 
     return emplacement;
+}
+
+void effectuer_deplacement(plateau parking){
+    coordonnee vehicule_a_deplacer = saisie_coordonnee(parking);
+    coordonnee nouvel_emplacement = saisie_coordonnee(parking);
+
+    case_contient_vehicule(parking, vehicule_a_deplacer);
 }
 
 int deplacement_vertical_horizontal(coordonnee vehicule_a_deplacer, coordonnee nouvel_emplacement){
@@ -215,23 +273,6 @@ int verifier_validite_deplacement(coordonnee vehicule_a_deplacer, coordonnee nou
     return est_valide;
 }
 
-void afficher_indice_colonne(int colonne_max){
-    for (int i = 0; i < colonne_max; i++) {
-        printf("%d", i+1); //à adapter comment sera le plateau
-    }
-    printf("\n");
-}
-
-void afficher_parking(plateau parking){
-    afficher_indice_colonne(parking.nbColonnes);
-    init_parking(parking);
-    //TRUC AVEC LA MATRICE
-}
-
-void effectuer_deplacement(plateau parking, coordonnee nouvel_emplacement){
-    
-}
-
 void mise_en_place_deplacement(plateau parking){
     do{
         coordonnee vehicule_a_deplacer = saisie_vehicule_a_deplacer(parking);
@@ -245,54 +286,36 @@ void mise_en_place_deplacement(plateau parking){
     effectuer_deplacement(plateau parking() );
 }
 
-void deroulement_partie(){
+int conversion_coordonee(coordonnee * c){
+    int ligne = c->ligne - (c->ligne - 1);
+    int colonne = c->colonne - 1;
+}
+
+void init_matrice(char * matrice){
+
+}
+
+void deroulement_partie(void){
     plateau parking;
     //1. on initialise le plateau
-    parking.nbLignes = 5;
-    parking.nbColonnes = 7;
-    parking.nbMinCoups = 2;
-    parking.sortie = (coordonnee) {'E', 7};
-    //2. on initalise la matrice qui contient les voitures donc les voitures avec
-    //2.1 la voiture rouge est initilise
-    coordonnee debut = {'E', 2};
-    coordonnee fin = {'E', 3};
-    //compter le nombre de case entre le debut et la fin pour avoir la taille
-    vehicule voitureRouge = {2, debut, fin, 'R'};
-    //symbole trouver grace au systeme de lois
-    init_parking(parking);
-    //2.1.1 ajout de la voiture rouge dans la matrice
-    parking.listeVehicule[0] = &voitureRouge;
-    //2.2 boucle qui initilise les autres voitures puis les ajoute dans la matrice
-    debut.ligne = 'B';
-    debut.colonne = 1;
-    //case au milieu B2
-    fin.ligne = 'B';
-    fin.colonne = 3;
-    vehicule camion1 = {3, debut, fin, ' '};
-    parking.listeVehicule[1] = &camion1;
+    init_parking_defaut(parking);
 
-    debut.ligne = 'C';
-    debut.colonne = 5;
-    //case au milieu D5
-    fin.ligne = 'E';
-    fin.colonne = 5;
-    vehicule camion2 = {3, debut, fin, ' '};
-    parking.listeVehicule[2] = &camion2;
-
-    debut.ligne = 'A';
-    debut.colonne = 6;
-    fin.ligne = 'A';
-    fin.colonne = 7;
-    vehicule voiture = {2, debut, fin, ' '};
-    parking.listeVehicule[3] = &camion2;
-
-    for(int indice = 1, nb_symboles_restants = TAILLE; indice < NB_TOTAL_VEHICULE; indice++, nb_symboles_restants--) {
-        char symboles[TAILLE] = {'+', '-', '=', '?', '~', '$', '*', '#', '%', '{',
-                                 '&', '@', '^', '>', '<', '/', '(', ')', '[', ']'};
-        parking.listeVehicule[indice]->symbole = tire_symbole_aleatoire(symboles, nb_symboles_restants);
+    //TANTQUE (voiture n'as pas atteint la sortie)
+    char choix = get_choice();
+    switch (choix) {
+        case 'd':
+        case 'D':
+            effectuer_deplacement(parking);
+            break;
+        case 'r':
+        case 'R':
+            init_matrice(parking.matrice[0]);
+            break;
+        default:
+            printf("Vous avez appuyé sur une mauvaise touche\n");
+            break;
     }
 
-    mise_en_place_deplacement(parking);
 }
 
 /** \fn choose_action
@@ -360,15 +383,6 @@ coordonnee trouver_centre_camion(vehicule camion){
     return milieu;
 }
 
-/**
- * \fn get_choice
- * \brief get a character choose by the user
-*/
-char get_choice(void){
-    char c = -1;
-    scanf("%c", &c);
-    return c;
-}
 
 /**
  * \fn pause
