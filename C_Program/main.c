@@ -158,32 +158,91 @@ int case_contient_vehicule(plateau parking, coordonnee vehicule_a_deplacer){
     return contient_vehicule;
 }
 
-coordonnee saisie_coordonnee(plateau parking){
+coordonnee saisie_vehicule_a_deplacer(plateau parking){
     coordonnee emplacement = {0, 0};
     do {
         emplacement.ligne = ligne_utilisateur();
         emplacement.colonne = colonne_utilisateur();
+
+        if(!case_contient_vehicule(parking, emplacement) ){
+            printf("Attention: vous avez entre une case qui ne contient pas de véhicule\n");
+            printf("Pour vouloir déplacer un véhicule, il faut que vous entriiez une case contenant un véhicule\n");
+        }
+    }while(!case_contient_vehicule(parking, emplacement) );
+
+    return emplacement;
+}
+
+coordonnee saisie_vehicule_a_deplacer(plateau parking){
+    coordonnee emplacement = {0, 0};
+    do {
+        emplacement.ligne = ligne_utilisateur();
+        emplacement.colonne = colonne_utilisateur();
+
+        if(case_contient_vehicule(parking, emplacement) ){
+            printf("Attention: vous avez entre une case qui contient un véhicule\n");
+            printf("Pour déplacer un véhicule sur une case, il faut que cette case soit libre\n");
+        }
     }while(case_contient_vehicule(parking, emplacement) );
 
     return emplacement;
 }
 
-void display_index_column(int columns_max){
-    for (int i = 0; i < columns_max; i++) {
+int deplacement_vertical_horizontal(coordonnee vehicule_a_deplacer, coordonnee nouvel_emplacement){
+    int est_valide = 0;
+    if(vehicule_a_deplacer.ligne == nouvel_emplacement.ligne || vehicule_a_deplacer.colonne == nouvel_emplacement.colonne){
+        est_valide = 1;
+    }
+
+    return est_valide;
+}
+
+int aucun_chevauchement_vehicules(){
+    int est_valide = 0;
+    if( ){                                //Si aucune des cases de là où se trouvera le véhicule est deja occupé par un autre véhicule
+        est_valide = 1;
+    }
+
+    return est_valide;
+}
+
+int verifier_validite_deplacement(coordonnee vehicule_a_deplacer, coordonnee nouvel_emplacement){
+    int est_valide = 0;
+    if(deplacement_vertical_horizontal(vehicule_a_deplacer, nouvel_emplacement) && aucun_chevauchement_vehicules() ){
+        est_valide = 1;
+    }
+
+    return est_valide;
+}
+
+void afficher_indice_colonne(int colonne_max){
+    for (int i = 0; i < colonne_max; i++) {
         printf("%d", i+1); //à adapter comment sera le plateau
     }
     printf("\n");
 }
 
 void afficher_parking(plateau parking){
-    display_index_column(parking.nbColonnes);
+    afficher_indice_colonne(parking.nbColonnes);
     init_parking(parking);
     //TRUC AVEC LA MATRICE
 }
 
-void effectuer_deplacement(plateau parking){
-    coordonnee vehicule_a_deplacer = saisie_coordonnee(parking);
-    coordonnee nouvel_emplacement = saisie_coordonnee(parking);
+void effectuer_deplacement(plateau parking, coordonnee nouvel_emplacement){
+    
+}
+
+void mise_en_place_deplacement(plateau parking){
+    do{
+        coordonnee vehicule_a_deplacer = saisie_vehicule_a_deplacer(parking);
+        coordonnee nouvel_emplacement = saisie_coordonnee(parking);
+
+        if(verifier_validite_deplacement() ){  //A finir
+            effectuer_deplacement(parking); //A faire en fonction du sens de déplacement du véhicule (verticale ou horizontal) et selon sa taille
+        }
+    }while(verifier_validite_deplacement() );
+
+    effectuer_deplacement(plateau parking() );
 }
 
 void deroulement_partie(){
@@ -233,7 +292,7 @@ void deroulement_partie(){
         parking.listeVehicule[indice]->symbole = tire_symbole_aleatoire(symboles, nb_symboles_restants);
     }
 
-    effectuer_deplacement(parking);
+    mise_en_place_deplacement(parking);
 }
 
 /** \fn choose_action
