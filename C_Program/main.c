@@ -85,25 +85,25 @@ void display_splash_screen(void){
 void afficher_menu(void){
     printf("MENU\n");
     printf("l/L = lancer une partie\n");
-    printf("r/R = lire les régles\n");
+    printf("r/R = lire les regles\n");
     printf("q/Q = quitter\n");
 }
 
 void afficher_regles(void){
-    printf("Les règles du jeu sont simples.\n");
-    printf("Une voiture rouge est présente sur le plateau\n");
-    printf("Le but du jeu est de déplacer le véhicule rouge pour qu'elle atteigne la sortie\n");
-    printf("Pour atteindre cet objectif, vous devrez déplacer les autres véhicules\n\n");
-    printf("Voici comment se déroule un tour de jeu :\n");
-    printf("Tout d'abord, vous devez choisir un véhicule à déplacer\n");
-    printf("Ensuite, vous devez déplacer votre véhicule verticalement ou horizontalement du nombre de case que vous souhaiter\n");
-    printf("Enfin, vous constatez les conséquence de votre déplacement et adaptez vos futures actions\n\n");
+    printf("Les regles du jeu sont simples.\n");
+    printf("Une voiture rouge est presente sur le plateau\n");
+    printf("Le but du jeu est de deplacer la voiture rouge pour qu'elle atteigne la sortie\n");
+    printf("Pour atteindre cet objectif, vous devrez deplacer les autres vehicules\n\n");
+    printf("Voici comment se deroule un tour de jeu :\n");
+    printf("Tout d'abord, vous devez choisir un véhicule à deplacer\n");
+    printf("Ensuite, vous devez deplacer votre vehicule verticalement ou horizontalement du nombre de case que vous souhaitez\n");
+    printf("Enfin, vous constatez les consequences de votre deplacement et adaptez vos futures actions\n\n");
 }
 
 void afficher_consignes(void){
     printf("Pour faire deplacer un vehicule vous devez d'abord entrez la lettre d.\n");
     printf("Pour recommencer avec le meme plateau de zero vous devez entrez la lettre r.\n");
-    printf("Attention lorsque vous etes EN MODE DEPLACEMENT, vous ne pouvez pas remettre le plateau comme il était au début.\n");
+    printf("Attention lorsque vous etes EN MODE DEPLACEMENT, vous ne pouvez pas remettre le plateau comme il etait au debut.\n");
 }
 
 void afficher_index_colonne(int columns_max){
@@ -289,12 +289,12 @@ int a_atteint_sortie(plateau parking){
     int col_sortie = 0;
     conversion_coordonee(parking.sortie, &line_sortie, &col_sortie);
 
-    int a_atteint_sortie = 1;
+    int sortie_est_atteinte = 1;
     if(line_voiture_rouge == line_sortie && col_voiture_rouge == col_sortie){
-        a_atteint_sortie--;
+        sortie_est_atteinte--;
     }
 
-    return a_atteint_sortie;
+    return sortie_est_atteinte;
 }
 
 void free_matrice(plateau parking){
@@ -368,132 +368,134 @@ int case_contient_vehicule(plateau * parking, coordonnee emplacement){
 }
 
 deplacement init_deplacement(plateau * parking){
-    deplacement d = {};
+    deplacement dep = {};
 
-    int is_good = 1;
+    int est_valide = 1;
     coordonnee vehicule_a_deplacer = {0,0};
-    while (is_good){
-        printf("Vous devez saisir une case contenant un vehicule, càd une case avec un symbole.\n");
+    while (est_valide){
+        printf("Vous devez saisir une case contenant un vehicule, c'est à dire une case avec un symbole.\n");
         vehicule_a_deplacer = saisie_coordonnee();
-        if(!(case_contient_vehicule(parking, vehicule_a_deplacer))){
+        if(!(case_contient_vehicule(parking, vehicule_a_deplacer) ) ){
             printf("\nAttention: vous avez entre une case qui est vide\n");
             printf("Pour déplacer un véhicule sur une case, il faut choisir une case avec un vehicule\n\n");
         } else{
-            is_good--;
+            est_valide--;
         }
     }
 
-    is_good = 1;
+    est_valide = 1;
     coordonnee nouvel_emplacement = {0,0};
-    while (is_good){
+    while (est_valide){
         printf("Vous devez saisir une case vide ou vous souhaitez deplacer le vehicule choisi.\n");
         nouvel_emplacement = saisie_coordonnee();
-        if(case_contient_vehicule(parking, nouvel_emplacement)){
+        if(case_contient_vehicule(parking, nouvel_emplacement) ){
             printf("\nAttention: vous avez entre une case qui contient un véhicule\n");
             printf("Pour déplacer un véhicule sur une case, il faut que cette case soit libre\n\n");
         } else{
-            is_good--;
+            est_valide--;
         }
     }
 
-    d.caseDebut = vehicule_a_deplacer;
-    d.caseArrivee = nouvel_emplacement;
+    dep.caseDebut = vehicule_a_deplacer;
+    dep.caseArrivee = nouvel_emplacement;
 
-    int line = 0;
-    int col = 0;
-    conversion_coordonee(vehicule_a_deplacer, &line, &col);
-    d.symbole = parking->matrice[line][col];
+    int ligne = 0;
+    int colonne = 0;
+    conversion_coordonee(vehicule_a_deplacer, &ligne, &colonne);
+    dep.symbole = parking->matrice[ligne-1][colonne];
 
-    return d;
+    return dep;
 }
 
-int est_valide(deplacement depl, plateau * parking){
+int deplacement_est_valide(deplacement dep, plateau * parking){
     int est_valide = 1;
-    //sens de déplacement doit etre le meme que le vehicule en question
+    //sens de déplacement doit être le meme que le véhicule en question
     //Premiere verif
-    char sens_depl = 0;
-    if(depl.caseDebut.ligne == depl.caseArrivee.ligne){
-        sens_depl = 'H';
-    } else if(depl.caseDebut.colonne == depl.caseArrivee.colonne){
-        sens_depl = 'V';
+    char sens_deplacement = 0;
+    if(dep.caseDebut.ligne == dep.caseArrivee.ligne){
+        sens_deplacement = 'H';
+    } else if(dep.caseDebut.colonne == dep.caseArrivee.colonne){
+        sens_deplacement = 'V';
     } else{
         est_valide = -1;
     }
 
     //deuxieme verif
     int est_trouve = 0;
-    int i = 0;
-    while (i < NB_TOTAL_VEHICULE && !est_trouve) {
-        if(depl.symbole == parking->listeVehicule[i]->symbole){
-            if(sens_depl != parking->listeVehicule[i]->sens_vehicule){
-                est_valide = -2;
-            }
+    int indice = 0;
+    while (indice < NB_TOTAL_VEHICULE && !est_trouve) {
+        if(dep.symbole == parking->listeVehicule[indice]->symbole && sens_deplacement != parking->listeVehicule[indice]->sens_vehicule){
+            est_valide = -2;
+
+        }
+        else if(dep.symbole == parking->listeVehicule[indice]->symbole) {
             est_trouve = 1;
-        } else{
-            i++;
+        }
+        else{
+            indice++;
         }
     }
 
     int nb_cases_besoin = 0;
-    if(parking->listeVehicule[i]->taille == 2){
+    if(parking->listeVehicule[indice]->taille == 2){
         nb_cases_besoin = 1;
     } else{
         nb_cases_besoin = 2;
     }
     //troisieme verif
     //voir si les autres cases qui sont derriere celle d'arrive sont vides ou contiene le meme symbole
-    if(sens_depl == 'H'){
-        int line = 0;
-        int col = 0;
-        conversion_coordonee(depl.caseArrivee, &line, &col);
-        if(parking->matrice[line][col-1] != ' ' && parking->matrice[line][col-1] != depl.symbole){
+    if(sens_deplacement == 'H'){
+        int ligne = 0;
+        int colonne = 0;
+        conversion_coordonee(dep.caseArrivee, &ligne, &colonne);
+        if(parking->matrice[ligne][colonne-1] != ' ' && parking->matrice[ligne][colonne-1] != dep.symbole){
             est_valide = -3;
         }
 
         if(nb_cases_besoin == 2) {
-            if(parking->matrice[line][col-2] != ' ' && parking->matrice[line][col-2] != depl.symbole){
+            if(parking->matrice[ligne][colonne-2] != ' ' && parking->matrice[ligne][colonne-2] != dep.symbole){
                 est_valide = -3;
             }
         }
     } else{
-        int line = 0;
-        int col = 0;
-        conversion_coordonee(depl.caseArrivee, &line, &col);
-        if(parking->matrice[line-1][col] != ' ' && parking->matrice[line-1][col] != depl.symbole){
+        int ligne = 0;
+        int colonne = 0;
+        conversion_coordonee(dep.caseArrivee, &ligne, &colonne);
+        if(parking->matrice[ligne-1][colonne] != ' ' &&
+           parking->matrice[ligne-1][colonne] != dep.symbole){
             est_valide = -3;
         }
 
-        if(nb_cases_besoin == 2) {
-            if(parking->matrice[line-2][col] != ' ' && parking->matrice[line-2][col] != depl.symbole){
-                est_valide = -3;
-            }
+        if(nb_cases_besoin == 2 && parking->matrice[ligne-2][colonne] != ' ' &&
+           parking->matrice[ligne-2][colonne] != dep.symbole) {
+            est_valide = -3;
         }
     }
 
     return est_valide;
 }
 
-void deplacement_vehicule(deplacement d, plateau * parking){
+//void deplacement_vehicule(deplacement d, plateau * parking){
     //A finir
-}
+//}
 
 void effectuer_deplacement(plateau * parking){
-    deplacement d1 = init_deplacement(parking);
+    deplacement dep = init_deplacement(parking);
 
-    while (est_valide(d1, parking) < 0){
+    while (deplacement_est_valide(dep, parking) < 0){
         printf("Le deplacement ne peut s'effectuer car vous essayez de deplacer la voiture ");
         //trouver la raison et faire un message d'erreur en fonction DONC plusieurs code erreurs
-        if(est_valide(d1, parking) == -1){
+        if(deplacement_est_valide(dep, parking) == -1){
             printf("de maniere diagonale.\n");
-        } else if(est_valide(d1, parking) == -2){
+        } else if(deplacement_est_valide(dep, parking) == -2){
             printf("dans le sens opposé du vehicule.\n");
         } else {
             printf("sur une case deja occupé par un vehicule.\n");
         }
-        d1 = init_deplacement(parking);
+        dep = init_deplacement(parking);
     }
 
-    deplacement_vehicule(d1, parking);
+    //deplacement_vehicule(d1, parking);
     printf("Deplacement_reussi\n");
     pause();
 }
@@ -515,7 +517,7 @@ void deroulement_partie(void){
         switch (choix) {
             case 'd': case 'D': effectuer_deplacement(&parking); nbCoupJ++; break;
             case 'r': case 'R': init_matrice(&parking); nbCoupJ = 0; break;
-            default: printf("Vous avez appuyé sur une mauvaise touche\n"); break;
+            default: printf("Vous avez appuye sur une mauvaise touche\n"); break;
         }
         flush_stdin_buffer();
     }
@@ -541,12 +543,12 @@ int main(void){
             case 'r': case 'R': afficher_regles(); pause(); break;
             case 'l': case 'L': deroulement_partie(); break;
             case 'q': case 'Q': is_finish--; break;
-            default: printf("Vous avez appuye sur une mauvaise touche\n"); break;
+            default: printf("Vous avez appuye sur une mauvaise touche\n\n"); break;
         }
 
         flush_stdin_buffer();
-        display_clear();
     }
+    display_clear();
 
     return EXIT_SUCCESS;
 }
