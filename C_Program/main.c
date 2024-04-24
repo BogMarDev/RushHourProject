@@ -176,6 +176,7 @@ void afficher_matrice(plateau * parking){
  *                indice se voit affecter l'indice de la case où se situe le symbole qui a été tiré au sort
  * Postcondition : Un décalage a eu lieu dans le tableau symboles.
  *                 Le contenu de la case d'indice indice a été décalé à la dernière case contenant autre chose que null
+ *                 indice est incrémenté tant qu'il faut encore effectuer le décalage
 */
 void modifier_symboles(char symboles[TAILLE], int indice){
     while(indice < TAILLE && symboles[indice]){
