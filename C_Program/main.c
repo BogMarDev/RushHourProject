@@ -353,14 +353,14 @@ coordonnee saisie_coordonnee(){
     return emplacement;
 }
 
-int case_contient_vehicule(plateau * parking, coordonnee emplacement){
+int case_contient_vehicule(plateau * parking, coordonnee emplacement, char symbole){
     int contient_vehicule = 0;
 
     int line = 0;
     int col = 0;
     conversion_coordonee(emplacement, &line, &col);
 
-    if(parking->matrice[line][col] != ' '){
+    if(parking->matrice[line][col] != ' ' || parking->matrice[line][col] != symbole){
         contient_vehicule = 1;
     }
 
@@ -375,7 +375,12 @@ deplacement init_deplacement(plateau * parking){
     while (est_valide){
         printf("Vous devez saisir une case contenant un vehicule, c'est à dire une case avec un symbole.\n");
         vehicule_a_deplacer = saisie_coordonnee();
-        if(!(case_contient_vehicule(parking, vehicule_a_deplacer) ) ){
+        int ligne = 0;
+        int colonne = 0;
+        conversion_coordonee(vehicule_a_deplacer, &ligne, &colonne);
+        char symbole = parking->matrice[ligne][colonne];
+
+        if(!(case_contient_vehicule(parking, vehicule_a_deplacer, symbole) ) ){
             printf("\nAttention: vous avez entre une case qui est vide\n");
             printf("Pour déplacer un véhicule sur une case, il faut choisir une case avec un vehicule\n\n");
         } else{
@@ -388,9 +393,14 @@ deplacement init_deplacement(plateau * parking){
     while (est_valide){
         printf("Vous devez saisir une case vide ou vous souhaitez deplacer le vehicule choisi.\n");
         nouvel_emplacement = saisie_coordonnee();
-        if(case_contient_vehicule(parking, nouvel_emplacement) ){
-            printf("\nAttention: vous avez entre une case qui contient un véhicule\n");
-            printf("Pour déplacer un véhicule sur une case, il faut que cette case soit libre\n\n");
+        int ligne = 0;
+        int colonne = 0;
+        conversion_coordonee(nouvel_emplacement, &ligne, &colonne);
+        char symbole = parking->matrice[ligne][colonne];
+
+        if(case_contient_vehicule(parking, nouvel_emplacement, symbole) ){
+            printf("\nAttention: vous avez entre une case qui contient un vehicule different de celui que vous souhaitez deplace\n");
+            printf("Pour déplacer un véhicule sur une case, il faut que cette case soit libre ou qu'elle contiennent le véhicule que vous souhaitez déplacer\n\n");
         } else{
             est_valide--;
         }
