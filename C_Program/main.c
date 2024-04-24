@@ -35,7 +35,7 @@ typedef struct{
 typedef struct {
     coordonnee case_debut;
     coordonnee case_arrivee;
-    char sens_depl;
+    char sens_dep;
     char symbole;
 }deplacement;
 
@@ -66,11 +66,8 @@ char faire_choix(void){
  * Postcondition : met le programme en pause pendant l'exécution si nécessaire
 */
 void pause(void){
-    char caractere = 0;
-    do{
-        printf("\n\x1b[31;47mAppuyez sur ENTER(↵) pour continuer\x1b[0m...");
-        caractere = faire_choix();
-    }while(caractere != 13);
+    printf("\n\x1b[31;47mAppuyez sur ENTER(↵) pour continuer\x1b[0m...");
+    faire_choix();
 }
 
 /**
@@ -145,13 +142,17 @@ void afficher_numero_colonne(int nb_colonnes){
     printf("\n");
 }
 
+/**
+ * Précondition : parking, indice_colonne et ligne initialisés. indice_colonne = 'A' et 0 <= ligne < parking->nb_lignes
+ *  Postcondition : affiche une ligne du plateau de jeu
+ */
 void afficher_tableau(plateau * parking, char indice_colonne, int ligne){
-    for (int column = 0; column < parking->nb_colonnes; column++) {
+    for (int colonne = 0; colonne < parking->nb_colonnes; colonne++) {
         indice_colonne += ligne;
-        if(column == 0){
-            printf("%c |%c|",indice_colonne, parking->matrice[ligne][column]);
+        if(colonne == 0){
+            printf("%c |%c|",indice_colonne, parking->matrice[ligne][colonne]);
         } else{
-            printf("|%c|", parking->matrice[ligne][column]);
+            printf("|%c|", parking->matrice[ligne][colonne]);
         }
     }
 }
@@ -165,7 +166,7 @@ void afficher_matrice(plateau * parking){
 
     for(int ligne = 0; ligne < parking->nb_lignes; ligne++){
         char indice_colonne = 'A';
-        afficher_tableau(&parking, indice_colonne, ligne);
+        afficher_tableau(parking, indice_colonne, ligne);
         printf("\n");
     }
 }
@@ -204,11 +205,22 @@ char tire_symbole_aleatoire(char symboles[TAILLE], int nb_symboles_restants){
     return symbole;
 }
 
-void conversion_coordonee(coordonnee c, int * line, int * column){
-    *line = c.ligne - 65;
-    *column = c.colonne - 1;
+/**
+ * Précondition : coord initialisé. INDICE_PREMIERE_LIGNE <= coord.ligne <= INDICE_DERNIERE_LIGNE &&
+ *                INDICE_PREMIERE_COLONNE <= coord.colonne <= INDICE_DERNIERE_COLONNE
+ * Postcondition : coord inchangé. Convertit ligne en un entier. ligne = coord.ligne - 65 et colonne = coord.colonne - 1
+ */
+void conversion_coordonee(coordonnee coord, int * ligne, int * colonne){
+    *ligne = coord.ligne - 65;
+    *colonne = coord.colonne - 1;
 }
 
+/**
+ * Précondition : camion est un véhicule initialisé
+ * Postcondition : camion inchangé
+ * Résultat : retourne une coordonnée contenant la lettre de la ligne et le numero de la colonne
+ *            de la case du milieu d'un camion
+ */
 coordonnee trouver_centre_camion(vehicule camion) {
     coordonnee milieu = {0, 0};
     if (camion.debut.ligne == camion.fin.ligne) {
@@ -222,37 +234,48 @@ coordonnee trouver_centre_camion(vehicule camion) {
     return milieu;
 }
 
-void init_matrice(plateau * p){
-    for(int indiceLigne = 0; indiceLigne < p->nb_lignes; indiceLigne++){
-        for(int indiceColonne = 0; indiceColonne < p->nb_colonnes; indiceColonne++){
-            p->matrice[indiceLigne][indiceColonne] = ' ';
+/**
+ * Précondition : parking est un plateau initialisé
+ * Postcondition : la matrice de parking est initialisée. Chaque case vide contient le caractère espace,
+ *                 la case de la sortie contient 'S', les cases contenant le véhicule rouge contiennent 'R' et
+ *                 les autres cases contenant un véhicule contiennent des symboles aléatoires (1 par véhicule)
+ */
+void init_matrice(plateau * parking){
+    for(int indice_ligne = 0; indice_ligne < parking->nb_lignes; indice_ligne++){
+        for(int indice_colonne = 0; indice_colonne < parking->nb_colonnes; indice_colonne++){
+            parking->matrice[indice_ligne][indice_colonne] = ' ';
         }
     }
 
-    for(int index = 0; index < NB_TOTAL_VEHICULE; index++){
-        int line = 0;
-        int col = 0;
-        conversion_coordonee(p->liste_vehicule[index]->debut, &line, &col);
-        p->matrice[line][col] = p->liste_vehicule[index]->symbole;
-        line = 0;
-        col = 0;
-        conversion_coordonee(p->liste_vehicule[index]->fin, &line, &col);
-        p->matrice[line][col] = p->liste_vehicule[index]->symbole;
-        if(p->liste_vehicule[index]->taille == 3){
-            line = 0;
-            col = 0;
-            coordonnee milieu = trouver_centre_camion(p->liste_vehicule[index][0]);
-            conversion_coordonee(milieu, &line, &col);
-            p->matrice[line][col] = p->liste_vehicule[index]->symbole;
+    for(int indice = 0; indice < NB_TOTAL_VEHICULE; indice++){
+        int ligne = 0;
+        int colonne = 0;
+        conversion_coordonee(parking->liste_vehicule[indice]->debut, &ligne, &colonne);
+        parking->matrice[ligne][colonne] = parking->liste_vehicule[indice]->symbole;
+        ligne = 0;
+        colonne = 0;
+        conversion_coordonee(parking->liste_vehicule[indice]->fin, &ligne, &colonne);
+        parking->matrice[ligne][colonne] = parking->liste_vehicule[indice]->symbole;
+        if(parking->liste_vehicule[indice]->taille == 3){
+            ligne = 0;
+            colonne = 0;
+            coordonnee milieu = trouver_centre_camion(parking->liste_vehicule[indice][0]);
+            conversion_coordonee(milieu, &ligne, &colonne);
+            parking->matrice[ligne][colonne] = parking->liste_vehicule[indice]->symbole;
         }
     }
 
-    int line_sortie = 0;
-    int col_sortie = 0;
-    conversion_coordonee(p->sortie, &line_sortie, &col_sortie);
-    p->matrice[line_sortie][col_sortie] = 'S';
+    int ligne_sortie = 0;
+    int colonne_sortie = 0;
+    conversion_coordonee(parking->sortie, &ligne_sortie, &colonne_sortie);
+    parking->matrice[ligne_sortie][colonne_sortie] = 'S';
 }
 
+/**
+ * Précondition : /
+ * Postcondition : /
+ * Résultat : retourne le parking déclaré et initialisé
+ */
 plateau init_parking_defaut(){
     plateau parking = {};
     parking.liste_vehicule = malloc(NB_TOTAL_VEHICULE * sizeof(vehicule *));
@@ -278,8 +301,8 @@ plateau init_parking_defaut(){
     //sens du vehic facile a definir car si c'est la meme lettre on est H = Horizontal sinon on est V = Vertical
     coordonnee debut = {'E', 2};
     coordonnee fin = {'E', 3};
-    vehicule voitureRouge = {2, debut, fin, 'R', 'H'};
-    parking.liste_vehicule[0] = &voitureRouge;
+    vehicule voiture_rouge = {2, debut, fin, 'R', 'H'};
+    parking.liste_vehicule[0] = &voiture_rouge;
 
     //3. camion n°1
     debut.ligne = 'B';
@@ -319,27 +342,36 @@ plateau init_parking_defaut(){
     return parking;
 }
 
+/**
+ * Précondition : parking initialisé
+ * Postcondition : parking inchangé
+ * Résultat : retourne 1 si la sortie est atteinte. Sinon, retourne 0
+ */
 int a_atteint_sortie(plateau parking){
-    int line_voiture_rouge = 0;
-    int col_voiture_rouge = 0;
+    int ligne_voiture_rouge = 0;
+    int colonne_voiture_rouge = 0;
     //J'ai mis la fin ca je ne sais si c'est le debut ou la fin qu'on a mis a droite
-    conversion_coordonee(parking.liste_vehicule[0]->fin, &line_voiture_rouge, &col_voiture_rouge);
-    int line_sortie = 0;
-    int col_sortie = 0;
-    conversion_coordonee(parking.sortie, &line_sortie, &col_sortie);
+    conversion_coordonee(parking.liste_vehicule[0]->fin, &ligne_voiture_rouge, &colonne_voiture_rouge);
+    int ligne_sortie = 0;
+    int colonne_sortie = 0;
+    conversion_coordonee(parking.sortie, &ligne_sortie, &colonne_sortie);
 
-    int sortie_est_atteinte = 1;
-    if(line_voiture_rouge == line_sortie && col_voiture_rouge == col_sortie){
-        sortie_est_atteinte--;
+    int sortie_est_atteinte = 0;
+    if(ligne_voiture_rouge == ligne_sortie && colonne_voiture_rouge == colonne_sortie){
+        sortie_est_atteinte++;
     }
 
     return sortie_est_atteinte;
 }
 
-void free_matrice(plateau parking){
-    for (int i = 0; i < NB_TOTAL_VEHICULE; ++i) {
-        free(parking.liste_vehicule[i]);
-        parking.liste_vehicule[i] = NULL;
+/**
+ * Précondition : parking initialisé
+ * Postcondition : libère l'emplacement mémoire alloué dynamiquement pour le plateau parking
+ */
+void liberer_matrice(plateau parking){
+    for (int indice = 0; indice < NB_TOTAL_VEHICULE; ++indice) {
+        free(parking.liste_vehicule[indice]);
+        parking.liste_vehicule[indice] = NULL;
     }
     free(parking.liste_vehicule);
     parking.liste_vehicule = NULL;
@@ -347,7 +379,11 @@ void free_matrice(plateau parking){
 
 //Deplacement
 
-//LIGNE ET COLONNE USER ONT LE MEME CODE PEUT-ETRE QU'ON PEUT EN FAIRE QU'UNE SEULE
+/*
+ * Précondition : /
+ * Postcondition : deplacement_utilisateur contient la lettre correspondant à la ligne de la case saisie par l'utilisateur
+ * Résultat : retourne la lettre saisie par l'utilisateur
+ */
 char ligne_utilisateur(){
     char deplacement_utilisateur = 0;
     int is_good = 1;
@@ -362,13 +398,16 @@ char ligne_utilisateur(){
         } else{
             is_good--;
         }
-
     }
-
 
     return deplacement_utilisateur;
 }
 
+/**
+ * Précondition : /
+ * Postcondition : deplacement_utilisateur contient le chiffre correspondant à la colonne de la case saisie par l'utilisateur
+ * Résultat : retourne le chiffre saisi par l'utilisateur
+ */
 int colonne_utilisateur(){
     int deplacement_utilisateur = 0;
     int is_good = 1;
@@ -387,6 +426,11 @@ int colonne_utilisateur(){
     return deplacement_utilisateur;
 }
 
+/**
+ * Précondition : /
+ * Postcondition : emplacement contient la coordonnée d'une case d'une matrice
+ * Résultat : retourne les coordonnées entrées par l'utilisateur
+ */
 coordonnee saisie_coordonnee(){
     coordonnee emplacement = {0, 0};
     emplacement.ligne = ligne_utilisateur();
@@ -397,11 +441,11 @@ coordonnee saisie_coordonnee(){
 int case_contient_vehicule(plateau * parking, coordonnee emplacement, char symbole){
     int contient_vehicule = 0;
 
-    int line = 0;
-    int col = 0;
-    conversion_coordonee(emplacement, &line, &col);
+    int ligne = 0;
+    int colonne = 0;
+    conversion_coordonee(emplacement, &ligne, &colonne);
 
-    if(parking->matrice[line][col] != ' ' && parking->matrice[line][col] != symbole){
+    if(parking->matrice[ligne][colonne] != ' ' || parking->matrice[ligne][colonne] != symbole){
         contient_vehicule = 1;
     }
 
@@ -459,7 +503,7 @@ deplacement init_deplacement(plateau * parking){
         sens_deplacement = 'V';
     }
 
-    dep.sens_depl = sens_deplacement;
+    dep.sens_dep = sens_deplacement;
 
     int ligne = 0;
     int colonne = 0;
@@ -474,9 +518,9 @@ int deplacement_est_valide(deplacement dep, plateau * parking){
     //sens de déplacement doit être le meme que le véhicule en question
     //Premiere verif
     int ligne = 0;
-    int col = 0;
-    conversion_coordonee(dep.case_debut, &ligne, &col);
-    if(dep.sens_depl != parking->liste_vehicule[ligne][col].sens_vehicule){
+    int colonne = 0;
+    conversion_coordonee(dep.case_debut, &ligne, &colonne);
+    if(dep.sens_dep != parking->liste_vehicule[ligne][colonne].sens_vehicule){
         est_valide = -1;
     }
 
@@ -485,7 +529,7 @@ int deplacement_est_valide(deplacement dep, plateau * parking){
     int indice = 0;
     while (indice < NB_TOTAL_VEHICULE && !est_trouve) {
         if(dep.symbole == parking->liste_vehicule[indice]->symbole &&
-           dep.sens_depl != parking->liste_vehicule[indice]->sens_vehicule){
+           dep.sens_dep != parking->liste_vehicule[indice]->sens_vehicule){
             est_valide = -2;
 
         }
@@ -503,72 +547,131 @@ int deplacement_est_valide(deplacement dep, plateau * parking){
     } else{
         nb_cases_besoin = 2;
     }
+
     //troisieme verif
     //voir si les autres cases qui sont derriere celle d'arrive sont vides ou contiene le meme symbole
-    if(dep.sens_depl == 'H'){
-        int ligne = 0;
-        int colonne = 0;
-        conversion_coordonee(dep.case_arrivee, &ligne, &colonne);
-        if(parking->matrice[ligne][colonne-1] != ' ' && parking->matrice[ligne][colonne-1] != dep.symbole){
-            est_valide = -3;
-        }
-
-        if(nb_cases_besoin == 2) {
-            if(parking->matrice[ligne][colonne-2] != ' ' && parking->matrice[ligne][colonne-2] != dep.symbole){
-                est_valide = -3;
-            }
-        }
-    } else{
-        int ligne = 0;
-        int colonne = 0;
-        conversion_coordonee(dep.case_arrivee, &ligne, &colonne);
-        if(parking->matrice[ligne-1][colonne] != ' ' &&
-           parking->matrice[ligne-1][colonne] != dep.symbole){
-            est_valide = -3;
-        }
-
-        if(nb_cases_besoin == 2 && parking->matrice[ligne-2][colonne] != ' ' &&
-           parking->matrice[ligne-2][colonne] != dep.symbole) {
-            est_valide = -3;
-        }
+    ligne = 0;
+    colonne = 0;
+    conversion_coordonee(dep.case_arrivee, &ligne, &colonne);
+    if(dep.sens_dep == 'H' && parking->matrice[ligne][colonne-1] != ' ' &&
+       parking->matrice[ligne][colonne-1] != dep.symbole){
+        est_valide = -3;
+    }
+    else if(dep.sens_dep == 'H' && nb_cases_besoin == 2 && parking->matrice[ligne][colonne-2] != ' ' &&
+            parking->matrice[ligne][colonne-2] != dep.symbole) {
+        est_valide = -3;
+    }
+    else if(parking->matrice[ligne-1][colonne] != ' ' && parking->matrice[ligne-1][colonne] != dep.symbole){
+        est_valide = -3;
+    }
+    else if(nb_cases_besoin == 2 && parking->matrice[ligne-2][colonne] != ' ' &&
+            parking->matrice[ligne-2][colonne] != dep.symbole) {
+        est_valide = -3;
     }
 
     return est_valide;
 }
 
-void deplacement_vehicule(deplacement d, plateau * parking){
-    if(d.sens_depl == 'H'){
-        if(d.case_arrivee.ligne < d.case_debut.ligne){
-            //Verifier par quel sens prendre le portail si c'est par le bas ou par le haut
-            //passe par le portail magique càd si case_debut = E5 et case_arrive = C5 ALORS case_debut = C5 et case_arrive = A5
-            coordonnee tmp = d.case_debut; //sauvegarde E5
-            d.case_debut = d.case_arrivee; //nouvelle case_debut
-            int ecart = tmp.ligne - d.case_debut.ligne; //calcul de l'ecart entre E5 et C5 => E - C
-            coordonnee cor = {d.case_debut.ligne - ecart, d.case_debut.colonne}; //cor = {C - 2, meme colonne} ==> A5
-            d.case_arrivee = cor; //case_arrive => A5
-        } else{
-            int ligne = 0;
-            int col = 0;
-            conversion_coordonee(d.case_debut, &ligne, &col);
-        }
-    } else{
-        if(d.case_arrivee.colonne < d.case_debut.colonne){
-            //verifier par quel sens prendre le portail si c'est par la gauche ou par la droite
-            //passe par le portail magique càd si case_debut = B1 et case_arrive = B3 ALORS case debut sera B3 et case arrivee sera B 3+2
-            coordonnee tmp = d.case_debut;//Sauvegarde B1
-            d.case_debut = d.case_arrivee;//nouvelle case_debut
-            int ecart = d.case_debut.colonne - tmp.colonne; //calcul de l'ecart en B3 et B1 => 3 - 1
-            coordonnee cor = {d.case_debut.ligne, d.case_debut.colonne + ecart}; //cor = {meme ligne, 3 + 2}
-            d.case_arrivee = cor; //case_arrive => B5
-        } else{
-            //deplacement normal
-        }
+void deplacement_vehicule(deplacement dep, plateau * parking){
+    switch (dep.sens_dep) {
+        case 'H':
+            if(dep.case_arrivee.ligne < dep.case_debut.ligne){
+                //Verifier par quel sens prendre le portail si c'est par le bas ou par le haut
+                //passe par le portail magique càd si case_debut = E5 et case_arrive = C5 ALORS case_debut = C5 et case_arrive = A5
+                coordonnee tmp = dep.case_debut; //sauvegarde E5
+                dep.case_debut = dep.case_arrivee; //nouvelle case_debut
+                int ecart = tmp.ligne - dep.case_debut.ligne; //calcul de l'ecart entre E5 et C5 => E - C
+                coordonnee cor = {dep.case_debut.ligne - ecart, dep.case_debut.colonne}; //cor = {C - 2, meme colonne} ==> A5
+                dep.case_arrivee = cor; //case_arrive => A5
+            } else{
+                //MISE A ZERO DES ANCIENS EMPLACEMENT
+                int ligne = 0;
+                int col = 0;
+                conversion_coordonee(dep.case_debut, &ligne, &col);
+                parking->matrice[ligne][col] = ' ';
+                parking->matrice[ligne][col-1] = ' ';
+
+                int i = 0;
+                int est_trouve = 0;
+                while ( i < NB_TOTAL_VEHICULE && !est_trouve) {
+                    if(parking->liste_vehicule[i]->symbole == dep.symbole){
+                        est_trouve = 1;
+                    } else{
+                        i++;
+                    }
+                }
+
+                if(parking->liste_vehicule[i]->taille == 3){
+                    parking->matrice[ligne][col-2] = ' ';
+                }
+
+                //MISE EN SYMBOLE DES NOUVEAUX EMPLACEMENT
+                ligne = 0;
+                col = 0;
+                conversion_coordonee(dep.case_arrivee, &ligne, &col);
+                parking->matrice[ligne][col] = dep.symbole;
+                parking->matrice[ligne][col-1] = dep.symbole;
+
+                if(parking->liste_vehicule[i]->taille == 3){
+                    parking->matrice[ligne][col-2] = dep.symbole;
+                }
+            }
+            break;
+        case 'V':
+            if(dep.case_arrivee.colonne < dep.case_debut.colonne){
+                //verifier par quel sens prendre le portail si c'est par la gauche ou par la droite
+                //passe par le portail magique càd si case_debut = B1 et case_arrive = B3 ALORS case debut sera B3 et case arrivee sera B 3+2
+                coordonnee tmp = dep.case_debut;//Sauvegarde B1
+                dep.case_debut = dep.case_arrivee;//nouvelle case_debut
+                int ecart = dep.case_debut.colonne - tmp.colonne; //calcul de l'ecart en B3 et B1 => 3 - 1
+                coordonnee cor = {dep.case_debut.ligne, dep.case_debut.colonne + ecart}; //cor = {meme ligne, 3 + 2}
+                dep.case_arrivee = cor; //case_arrive => B5
+            } else{
+                //MISE A ZERO DES ANCIENS EMPLACEMENT
+                int ligne = 0;
+                int col = 0;
+                conversion_coordonee(dep.case_debut, &ligne, &col);
+                parking->matrice[ligne][col] = ' ';
+                parking->matrice[ligne++][col] = ' ';
+
+                int i = 0;
+                int est_trouve = 0;
+                while ( i < NB_TOTAL_VEHICULE && !est_trouve) {
+                    if(parking->liste_vehicule[i]->symbole == dep.symbole){
+                        est_trouve = 1;
+                    } else{
+                        i++;
+                    }
+                }
+
+                //Erreur ici
+                /*
+                if(parking->liste_vehicule[i]->taille == 3){
+                    ligne += 2;
+                    parking->matrice[ligne][col] = ' ';
+                }*/
+
+                //MISE EN SYMBOLE DES NOUVEAUX EMPLACEMENT
+                ligne = 0;
+                col = 0;
+                conversion_coordonee(dep.case_arrivee, &ligne, &col);
+                parking->matrice[ligne][col] = dep.symbole;
+                parking->matrice[ligne++][col] = dep.symbole;
+
+                /*
+                if(parking->liste_vehicule[i]->taille == 3){
+                    parking->matrice[ligne++][col] = dep.symbole;
+                }*/
+            }
+            break;
+        default: printf("OUPS. PAS DE SENS DE DEPLACEMENT\n"); break;
     }
 }
 
 void effectuer_deplacement(plateau * parking){
     deplacement dep = init_deplacement(parking);
-
+    //Casser
+    /*
     while (deplacement_est_valide(dep, parking) < 0){
         printf("Le deplacement ne peut s'effectuer car vous essayez de deplacer la voiture ");
         //trouver la raison et faire un message d'erreur en fonction DONC plusieurs code erreurs
@@ -580,8 +683,8 @@ void effectuer_deplacement(plateau * parking){
             printf("sur une case deja occupé par un vehicule.\n");
         }
         dep = init_deplacement(parking);
-    }
-
+    }*/
+    //casser
     deplacement_vehicule(dep, parking);
     printf("Deplacement_reussi\n");
     pause();
@@ -594,7 +697,7 @@ void deroulement_partie(void){
     pause();
 
     int nbCoupJ = 0;
-    while (a_atteint_sortie(parking)){
+    while (!a_atteint_sortie(parking) ){
         afficher_vide();
         afficher_matrice(&parking);
 
@@ -609,7 +712,7 @@ void deroulement_partie(void){
         vider_tampon_stdin();
     }
 
-    free_matrice(parking);
+    liberer_matrice(parking);
 }
 
 int main(void){
@@ -630,12 +733,11 @@ int main(void){
             case 'r': case 'R': afficher_regles(); pause(); break;
             case 'l': case 'L': deroulement_partie(); break;
             case 'q': case 'Q': is_finish--; break;
-            default: printf("Vous avez appuye sur une mauvaise touche\n\n"); break;
+            default: printf("Vous avez appuye sur une mauvaise touche\n\n"); pause(); break;
         }
 
         vider_tampon_stdin();
+        afficher_vide();
     }
-    afficher_vide();
-
     return EXIT_SUCCESS;
 }
