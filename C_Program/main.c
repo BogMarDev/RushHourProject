@@ -678,7 +678,7 @@ void deroulement_partie(void){
 
         switch (choix) {
             case 'd': case 'D': effectuer_deplacement(&parking); nbCoupJ++; break;
-            case 'r': case 'R': init_matrice(&parking); nbCoupJ = 0; break; //CASSER
+            case 'r': case 'R': init_matrice(&parking); nbCoupJ = 0; break; //CASSER jsp pq
             default: printf("Vous avez appuye sur une mauvaise touche\n"); break;
         }
         vider_tampon_stdin();
