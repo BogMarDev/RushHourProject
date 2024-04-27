@@ -148,19 +148,18 @@ void afficher_numero_colonne(int nb_colonnes){
  * Précondition : parking, indice_colonne et ligne initialisés. indice_colonne = 'A' et 0 <= ligne < parking->nb_lignes
  *  Postcondition : affiche une ligne du plateau de jeu
  */
-void afficher_tableau(plateau * parking, char indice_colonne, int ligne){
+void afficher_tableau(plateau * parking, char indice_ligne, int ligne){
     int colonne = 0;
     while (colonne < parking->nb_colonnes) {
-        indice_colonne = indice_colonne + ligne;
+        indice_ligne = indice_ligne + ligne;
         if(colonne == 0){
-            printf("%c ",indice_colonne);
+            printf("%c ",indice_ligne);
         }
         printf("[%c]", parking->matrice[ligne][colonne]);
         colonne++;
-        if(colonne == parking->sortie.colonne && ligne == parking->sortie.ligne){
-            printf(" --> S");
-        }
     }
+
+
 }
 
 /**
@@ -173,6 +172,9 @@ void afficher_matrice(plateau * parking){
     for(int ligne = 0; ligne < parking->nb_lignes; ligne++){
         char indice_colonne = 'A';
         afficher_tableau(parking, indice_colonne, ligne);
+        if(indice_colonne + ligne == parking->sortie.ligne){
+            printf(" --> S");
+        }
         printf("\n");
     }
 }
@@ -185,9 +187,9 @@ void afficher_matrice(plateau * parking){
  *                 Le contenu de la case d'indice indice a été décalé à la dernière case contenant autre chose que null
  *                 indice est incrémenté tant qu'il faut encore effectuer le décalage
 */
-void modifier_symboles(char symboles[TAILLE], int indice_symbole_tire, int nb_symboles_restants){
+void modifier_symboles(char symboles[TAILLE], int indice_symbole_tire, int * nb_symboles_restants){
     int indice = TAILLE - 1;
-    while(symboles[indice] == nb_symboles_restants - 1){
+    while(symboles[indice] == *nb_symboles_restants - 1){
         indice--;
     }
 
@@ -202,11 +204,11 @@ void modifier_symboles(char symboles[TAILLE], int indice_symbole_tire, int nb_sy
  *                 pour que les symboles restant soient toujours dans la partie de gauche de symboles
  * Résultat : retourne le symbole contenu à l'indice de nb_aleatoire dans le tableau symboles
 */
-char tire_symbole_aleatoire(char symboles[TAILLE], int nb_symboles_restants){
-    int nb_aleatoire = rand() % (nb_symboles_restants + 1);
+char tire_symbole_aleatoire(char symboles[TAILLE], int * nb_symboles_restants){
+    int nb_aleatoire = rand() % (*nb_symboles_restants + 1);
     char symbole = symboles[nb_aleatoire];
-    modifier_symboles(symboles, nb_aleatoire, nb_symboles_restants);
     nb_symboles_restants--;
+    modifier_symboles(symboles, nb_aleatoire, nb_symboles_restants);
 
     return symbole;
 }
@@ -319,7 +321,7 @@ plateau init_parking_defaut(){
     for(int indice = 1, nb_symboles_restants = TAILLE; indice < NB_TOTAL_VEHICULE; indice++, nb_symboles_restants--) {
         char symboles[TAILLE] = {'+', '-', '=', '?', '~', '$', '*', '#', '%', '{',
                                  '&', '@', '^', '>', '<', '/', '(', ')', '!', '|'};
-        parking.liste_vehicule[indice].symbole = tire_symbole_aleatoire(symboles, nb_symboles_restants);
+        parking.liste_vehicule[indice].symbole = tire_symbole_aleatoire(symboles, &nb_symboles_restants);
     }
 
     init_matrice(&parking);
@@ -464,7 +466,7 @@ deplacement init_deplacement(plateau * parking){
 
         conversion_coordonee(nouvel_emplacement, &ligne, &colonne);
 
-        if(case_contient(parking, ligne, colonne, dep.symbole)){
+        if(case_contient(parking, ligne, colonne, dep.symbole) && case_contient(parking, ligne, colonne, ' ')){
             printf("\nAttention: vous avez entre une case qui contient un vehicule different de celui que vous souhaitez deplace\n");
             printf("Pour déplacer un véhicule sur une case, il faut que cette case soit libre ou \nqu'elle contiennent le symbole du véhicule que vous souhaitez déplacer\n\n");
         } else{
@@ -494,65 +496,81 @@ deplacement init_deplacement(plateau * parking){
 
 //ici qu'on met la verif et tt
 //Fonction a faire en pseudocode aussi
-int deplacement_est_valide(deplacement dep, plateau * parking){
+int deplacement_est_valide(deplacement * dep, plateau * parking){
     int est_valide = 1;
     //Premiere verif
     //sens de déplacement doit être le meme que le véhicule en question
-    int indice = indice_voiture_recherche(parking, dep.symbole);
-    conversion_coordonee(dep.case_debut, &ligne, &colonne);
-    if(dep.sens_dep != parking->liste_vehicule[indice].sens_vehicule){
+    int indice = indice_voiture_recherche(parking, dep->symbole);
+    conversion_coordonee(dep->case_debut, &ligne, &colonne);
+    if(dep->sens_dep != parking->liste_vehicule[indice].sens_vehicule){
         est_valide = -1;
     }
-    //deuxieme verif
+    /*deuxieme verif
     //voir si les autres cases qui sont derriere celle d'arrive sont vides ou contiene le meme symbole
     //verifier les cases d'arriver pour ne pas se chevaucher
-    int ligne_dep = 0;
-    int col_dep = 0;
-    conversion_coordonee(dep.case_arrivee, &ligne_dep, &col_dep);
-    switch (dep.sens_dep) {
-        case 'H':
-            col_dep--;
-            while (col_dep != dep.case_debut.colonne && est_valide == 1){
-                printf("Checkpoint 3_H\n");
-                if(case_contient(parking, ligne_dep, col_dep, ' ') == 0){
-                    est_valide = -2;
-                }
-                col_dep--;
+    int line = 0;
+    int column = 0;
+    conversion_coordonee(dep.case_arrivee, &line, &column);
+    if(dep.sens_dep == 'H'){
+        while (column < (int) dep.case_debut.colonne && est_valide == 1){
+            if(case_contient(parking, line, column,' ')){
+                column++;
+            } else {
+                est_valide = -2;
             }
-            break;
-        case 'V':
-
-            ligne_dep++;
-            while (ligne_dep != dep.case_debut.ligne && est_valide == 1){
-                printf("Checkpoint 3_V\n");
-                if(case_contient(parking, ligne_dep, col_dep, ' ') == 0){
-                    est_valide = -2;
-                }
-                ligne_dep++;
+        }
+    } else if(dep.sens_dep == 'V'){
+        while (line < ((int) dep.case_debut.ligne) && est_valide == 1){
+            if(case_contient(parking, line, column, ' ')){
+                line++;
             }
-            break;
-    }
-    printf("Checkpoint 4\n");
+            else {
+                est_valide = -2;
+            }
+        }
+    }*/
     return est_valide;
 }
 
-void remplir(deplacement d, plateau * parking, char sym){
-    conversion_coordonee(d.case_debut, &ligne, &colonne);
-    parking->matrice[ligne][colonne] = sym;
+void vider(deplacement * d, plateau * parking){
+    conversion_coordonee(d->case_debut, &ligne, &colonne);
+    parking->matrice[ligne][colonne] = ' ';
 
-    int i = indice_voiture_recherche(parking, d.symbole);
+    int i = indice_voiture_recherche(parking, d->symbole);
 
-    if(d.sens_dep == 'H'){
-        parking->matrice[ligne][colonne-1] = sym;
+    if(d->sens_dep == 'H'){
+        parking->matrice[ligne][colonne-1] = ' ';
 
         if(parking->liste_vehicule[i].taille == 3){
-            parking->matrice[ligne][colonne-2] = sym;
+            parking->matrice[ligne][colonne-2] = ' ';
         }
     } else{
-        parking->matrice[ligne+1][colonne] = sym;
+        parking->matrice[ligne+1][colonne] = ' ';
 
         if(parking->liste_vehicule[i].taille == 3){
-            parking->matrice[ligne+2][colonne] = sym;
+            parking->matrice[ligne+2][colonne] = ' ';
+        }
+    }
+
+}
+
+void remplir(deplacement * d, plateau * parking){
+    conversion_coordonee(d->case_arrivee, &ligne, &colonne);
+    parking->matrice[ligne][colonne] = d->symbole;
+
+    int i = indice_voiture_recherche(parking, d->symbole);
+
+    if(d->sens_dep == 'H'){
+        parking->matrice[ligne][colonne-1] = d->symbole;
+
+        if(parking->liste_vehicule[i].taille == 3){
+            parking->matrice[ligne][colonne-2] = d->symbole;
+        }
+    } else{
+        parking->matrice[ligne+1][colonne] = d->symbole;
+
+        if(parking->liste_vehicule[i].taille == 3){
+            parking->matrice[ligne+2][colonne] = d->symbole;
         }
     }
 
@@ -575,58 +593,57 @@ void converions_depl(deplacement * dep){
     }
 }
 
-void effectuer_deplacement(plateau * parking){
-    deplacement dep = init_deplacement(parking); //initialiser
-
+void effectuer_deplacement(deplacement * dep, plateau * parking){
+    *dep = init_deplacement(parking);
+    //printf("Deplacement au départ \n Case de début: %c %d\n Case d'arrive: %c %d \n", dep.case_debut.ligne, dep.case_debut.colonne, dep.case_arrivee.ligne, dep.case_arrivee.colonne);
     //conversion si besoin
-    if(dep.sens_dep == 'H' && dep.case_debut.colonne == INDICE_PREMIERE_COLONNE){
-        converions_depl(&dep);
-    } else if(dep.sens_dep == 'H' && dep.case_debut.colonne == INDICE_DERNIERE_COLONNE) {
-        converions_depl(&dep);
-    } else if(dep.sens_dep == 'V' && dep.case_debut.ligne == INDICE_PREMIERE_LIGNE){
-        converions_depl(&dep);
-    } else if(dep.sens_dep == 'V' && dep.case_debut.ligne == INDICE_DERNIERE_LIGNE) {
-        converions_depl(&dep);
+    if(dep->sens_dep == 'H' && dep->case_debut.colonne == INDICE_PREMIERE_COLONNE){
+        converions_depl(dep);
+    } else if(dep->sens_dep == 'H' && dep->case_debut.colonne == INDICE_DERNIERE_COLONNE) {
+        converions_depl(dep);
+    } else if(dep->sens_dep == 'V' && dep->case_debut.ligne == INDICE_PREMIERE_LIGNE){
+        converions_depl(dep);
+    } else if(dep->sens_dep == 'V' && dep->case_debut.ligne == INDICE_DERNIERE_LIGNE) {
+        converions_depl(dep);
     }
-
-    int tmp = deplacement_est_valide(dep, parking);
+    //printf("Deplacement a la conversion \n Case de début: %c %d\n Case d'arrive: %c %d \n", dep.case_debut.ligne, dep.case_debut.colonne, dep.case_arrivee.ligne, dep.case_arrivee.colonne);
     //verification
+    int tmp = deplacement_est_valide(dep, parking);
     while (tmp < 0) {
         vider_tampon_stdin();
         printf("Le deplacement ne peut s'effectuer car vous essayez de deplacer la voiture ");
         //trouver la raison et faire un message d'erreur en fonction DONC plusieurs code erreurs
         if (tmp == -1) {
             printf("dans le sens opposé du vehicule.\n");
-        } else if(tmp == -2){
-            printf("sur une case deja occupé par un vehicule.\n\n");
-        }
+        } /*else{
+        printf("sur une case deja occupé par un vehicule.\n\n");
+        }*/
         pause();
         afficher_vide();
         afficher_matrice(parking);
 
         printf("Veuillez recommencez\n\n");
-        dep = init_deplacement(parking);
+        *dep = init_deplacement(parking);
         tmp = deplacement_est_valide(dep, parking);
     }
-
-
     //realisation du deplacement
-    remplir(dep, parking, ' ');
-    remplir(dep, parking, dep.symbole);
+    vider(dep, parking);
+    remplir(dep, parking);
 
     printf("Deplacement_reussi\n");
     pause();
 }
 
 
-void deroulement_partie(void){
+void deroulement_partie(void) {
     vider_tampon_stdin();
     plateau parking = init_parking_defaut();
     afficher_consignes();
     pause();
 
     int nbCoupJ = 0;
-    while (!(a_atteint_sortie(parking.liste_vehicule[0].fin, parking.sortie))){
+    deplacement dep;
+    while (!a_atteint_sortie(dep.case_arrivee, parking.sortie)){
         afficher_vide();
         afficher_matrice(&parking);
 
@@ -634,12 +651,15 @@ void deroulement_partie(void){
         char choix = faire_choix();
 
         switch (choix) {
-            case 'd': case 'D': effectuer_deplacement(&parking); nbCoupJ++; break;
+            case 'd': case 'D': effectuer_deplacement(&dep, &parking); nbCoupJ++; break;
             case 'r': case 'R': init_matrice(&parking); nbCoupJ = 0; break;
             default: printf("Vous avez appuye sur une mauvaise touche\n"); pause(); break;
         }
+
         vider_tampon_stdin();
     }
+    afficher_vide();
+    afficher_matrice(&parking);
     printf("Bravo vous avez gagné avec %d coups. Le nombre coups minimum pour ce plateau est de %d", nbCoupJ, parking.nb_min_coups);
     pause();
 }
