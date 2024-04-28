@@ -512,7 +512,6 @@ int deplacement_est_valide(deplacement * dep, plateau * parking){
     //Premiere verif
     //sens de déplacement doit être le meme que le véhicule en question
     int indice = indice_voiture_recherche(parking, dep->symbole);
-    conversion_coordonee(dep->case_debut, &ligne, &colonne);
     if(dep->sens_dep != parking->liste_vehicule[indice].sens_vehicule){
         est_valide = -1;
     }
@@ -603,22 +602,30 @@ void effectuer_deplacement(deplacement * dep, plateau * parking){
         //trouver la raison et faire un message d'erreur en fonction DONC plusieurs code erreurs
         if (tmp == -1) {
             printf("dans le sens opposé du vehicule.\n");
-        } /*else{
-        printf("sur une case deja occupé par un vehicule.\n\n");
-        }*/
+        }
         pause();
         afficher_vide();
         afficher_matrice(parking);
 
         printf("Veuillez recommencez\n\n");
         *dep = init_deplacement(parking);
+
+        if(dep->sens_dep == 'H' && dep->case_debut.colonne == INDICE_PREMIERE_COLONNE){
+            converions_depl(dep);
+        } else if(dep->sens_dep == 'H' && dep->case_debut.colonne == INDICE_DERNIERE_COLONNE) {
+            converions_depl(dep);
+        } else if(dep->sens_dep == 'V' && dep->case_debut.ligne == INDICE_PREMIERE_LIGNE){
+            converions_depl(dep);
+        } else if(dep->sens_dep == 'V' && dep->case_debut.ligne == INDICE_DERNIERE_LIGNE) {
+            converions_depl(dep);
+        }
         tmp = deplacement_est_valide(dep, parking);
     }
     //realisation du deplacement
     remplir(dep, parking, ' ');
     remplir(dep, parking, dep->symbole);
 
-    printf("Deplacement_reussi\n");
+    printf("Deplacement reussi\n");
     pause();
 }
 

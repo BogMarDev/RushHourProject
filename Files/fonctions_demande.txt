@@ -1,0 +1,102 @@
+type coordonnee = structure 
+    ligne : caractere
+    colonne : entier
+finstructure
+
+type vehicule = structure 
+    taille : entier
+    debut : coordonnee
+    fin : coordonnee
+    symbole : caractere
+    sens_vehicule : caractere
+finstructure
+
+type plateau = structure
+    nb_lignes : entier
+    nb_colonnes : entier
+    nb_min_coups : entier
+    sortie : coordonnee
+    matrice : tableau[5][7] de caractere
+    liste_vehicule : tableau[4]
+finstructure
+
+type deplacement = structure
+    case_debut : coordonnee
+    case_arrivee : coordonnee
+    nb_cases_besoin : entier
+    sens_depl : caractere
+    symbole : caractere
+finstructure
+
+//Précondition : dep et parking sont initialisé
+//Postcondition : dep et parking reste inchangé
+//Note : Palier de verification
+        -1: Le sens du deplacement est different de celui du vehicule. EX : essayez de deplacer un vehicule horizontal de maniere verticale
+        -2: Les cases ou on veut deplacer le vehicule sont occupé par autre chose que le vide
+//Resultat : retourne -1 si le premier niveau de verification ne passe pas;
+             retourne -2 si le deuxieme niveau de verification ne passe pas;
+             retourne 1 si le deplacement a passé les deux niveau de verification
+Fonction deplacement_est_valide(adr dep : deplacement, adr parking : plateau) : entier
+    est_valide : entier
+    est_valide <- 1
+
+    indice : entier
+    indice <-- indice_voiture_recherche(parking, dep.symbole)
+
+    SI dep.sens <> parking.listevehic[indice].sens ALORS 
+        est_valide <- -1
+    FINSI
+
+    //ICI il manque la deuxieme verification qu'on a pas reussi a faire
+
+FinFonction
+
+//TO DO SPECS
+Procedure effectuer_deplacement(adr dep : deplacement, adr parking : plateau)
+    .dep <-- init_deplacement(parking)
+
+    SI dep.sens = 'H' ET dep.case_debut.colonne = INDICE_PREMIERE_COLONNE ALORS
+        converions_depl(dep)
+    SINON SI dep.sens = 'H' ET dep.case_debut.colonne = INDICE_DERNIERE_COLONNE ALORS
+        converions_depl(dep)
+    SINON SI dep.sens = 'V' ET dep.case_debut.ligne = INDICE_PREMIERE_LIGNE ALORS
+        converions_depl(dep)
+    SINON SI dep.sens = 'V' ET dep.case_debut.ligne = INDICE_DERNIERE_LIGNE ALORS
+        converions_depl(dep)
+    FINSI
+
+    tmp : entier
+    tmp <-- deplacement_est_valide(dep, parking)
+    TANTQUE tmp < 0 REPETER
+        vider_tampon_stdin()
+        écrire("Le deplacement ne peut s'effectuer car vous essayez de deplacer la voiture ")
+
+        SI tmp = -1 ALORS
+            écrire("dans le sens opposé du vehicule.FINDELIGNE")
+        FINSI
+
+        pause()
+        afficher_vide()
+        afficher_matrice(parking)
+
+        écrire(Veuillez recommencez.FINDELIGNE")
+        .dep <-- init_deplacement(parking)
+
+        SI dep.sens = 'H' ET dep.case_debut.colonne = INDICE_PREMIERE_COLONNE ALORS
+            converions_depl(dep)
+        SINON SI dep.sens = 'H' ET dep.case_debut.colonne = INDICE_DERNIERE_COLONNE ALORS
+            converions_depl(dep)
+        SINON SI dep.sens = 'V' ET dep.case_debut.ligne = INDICE_PREMIERE_LIGNE ALORS
+            converions_depl(dep)
+        SINON SI dep.sens = 'V' ET dep.case_debut.ligne = INDICE_DERNIERE_LIGNE ALORS
+            converions_depl(dep)
+        FINSI
+
+        tmp <-- deplacement_est_valide(dep, parking)
+    FINTANTQUE
+
+    remplir(dep, parking, ' ')
+    remplir(dep, parking, dep.symbole)
+    écrire("Deplacement reussi.FINDELIGNE")
+    pause()
+FinProcedure
