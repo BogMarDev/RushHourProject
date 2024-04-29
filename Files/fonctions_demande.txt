@@ -28,14 +28,14 @@ type deplacement = structure
     symbole : caractere
 finstructure
 
-//Précondition : dep et parking sont initialisé
-//Postcondition : dep et parking reste inchangé
-//Note : Palier de verification
-        -1: Le sens du deplacement est different de celui du vehicule. EX : essayez de deplacer un vehicule horizontal de maniere verticale
-        -2: Les cases ou on veut deplacer le vehicule sont occupé par autre chose que le vide
-//Resultat : retourne -1 si le premier niveau de verification ne passe pas;
-             retourne -2 si le deuxieme niveau de verification ne passe pas;
-             retourne 1 si le deplacement a passé les deux niveau de verification
+//Précondition : dep et parking sont initialisés
+//Postcondition : dep et parking restent inchangés
+//Note : Palier de vérification
+        -1: Le sens du déplacement est différent de celui du vehicule. EX : essayer de deplacer un vehicule horizontal de maniere verticale
+        -2: Les cases où l'on veut déplacer le véhicule sont occupées par autre chose que le vide
+//Resultat : retourne -1 si le premier niveau de vérification ne passe pas;
+             retourne -2 si le deuxieme niveau de vérification ne passe pas;
+             retourne 1 si le déplacement a passé les deux niveaux de verifications
 Fonction deplacement_est_valide(adr dep : deplacement, adr parking : plateau) : entier
     est_valide : entier
     est_valide <- 1
@@ -47,22 +47,23 @@ Fonction deplacement_est_valide(adr dep : deplacement, adr parking : plateau) : 
         est_valide <- -1
     FINSI
 
-    //ICI il manque la deuxieme verification qu'on a pas reussi a faire
+    //ICI il manque la deuxieme verification qu'on n'a pas réussi à faire
 
 FinFonction
 
-//TO DO SPECS
+//Précondition : dep et parking sont initialisés
+//Postcondition : parking est modifié en fonction du déplacement souhaité. Si le déplacement n'est pas possible, un message d'erreur est transmis à l'utilisateur
 Procedure effectuer_deplacement(adr dep : deplacement, adr parking : plateau)
-    .dep <-- init_deplacement(parking)
+    dep <-- init_deplacement(parking)
 
     SI dep.sens = 'H' ET dep.case_debut.colonne = INDICE_PREMIERE_COLONNE ALORS
-        converions_depl(dep)
+        conversions_depl(dep)
     SINON SI dep.sens = 'H' ET dep.case_debut.colonne = INDICE_DERNIERE_COLONNE ALORS
-        converions_depl(dep)
+        conversions_depl(dep)
     SINON SI dep.sens = 'V' ET dep.case_debut.ligne = INDICE_PREMIERE_LIGNE ALORS
-        converions_depl(dep)
+        conversions_depl(dep)
     SINON SI dep.sens = 'V' ET dep.case_debut.ligne = INDICE_DERNIERE_LIGNE ALORS
-        converions_depl(dep)
+        conversions_depl(dep)
     FINSI
 
     tmp : entier
@@ -72,15 +73,15 @@ Procedure effectuer_deplacement(adr dep : deplacement, adr parking : plateau)
         écrire("Le deplacement ne peut s'effectuer car vous essayez de deplacer la voiture ")
 
         SI tmp = -1 ALORS
-            écrire("dans le sens opposé du vehicule.FINDELIGNE")
+            écrire("dans le sens opposé au vehicule.FINDELIGNE")
         FINSI
 
         pause()
         afficher_vide()
         afficher_matrice(parking)
 
-        écrire(Veuillez recommencez.FINDELIGNE")
-        .dep <-- init_deplacement(parking)
+        écrire(Veuillez recommencer.FINDELIGNE")
+        dep <-- init_deplacement(parking)
 
         SI dep.sens = 'H' ET dep.case_debut.colonne = INDICE_PREMIERE_COLONNE ALORS
             converions_depl(dep)
