@@ -52,7 +52,7 @@ Fonction deplacement_est_valide(adr dep : deplacement, adr parking : plateau) : 
 FinFonction
 
 //Précondition : dep et parking sont initialisés
-//Postcondition : parking est modifié en fonction du déplacement souhaité. Si le déplacement n'est pas possible, un message d'erreur est transmis à l'utilisateur
+//Postcondition : dep et parking sont modifiés en fonction du déplacement souhaité. Si le déplacement n'est pas possible, un message d'erreur est transmis à l'utilisateur
 Procedure effectuer_deplacement(adr dep : deplacement, adr parking : plateau)
     dep <-- init_deplacement(parking)
 
