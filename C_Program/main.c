@@ -362,7 +362,6 @@ int a_atteint_sortie(coordonnee v_rouge, coordonnee sortie){
     return sortie_est_atteinte;
 }
 
-//Deplacement
 /**
  * Précondition : /
  * Postcondition : deplacement_utilisateur contient la lettre correspondant à la ligne de la case saisie par l'utilisateur
@@ -378,7 +377,7 @@ char ligne_utilisateur(){
         deplacement_utilisateur_ligne = faire_choix();
 
         if(deplacement_utilisateur_ligne < INDICE_PREMIERE_LIGNE || deplacement_utilisateur_ligne > INDICE_DERNIERE_LIGNE){
-            printf("Vous avez entré une lettre de ligne invalide. Vous devez entrer une ligne entre %c et %c\n",
+            printf("Vous avez entre une lettre de ligne invalide. Vous devez entrer une ligne entre %c et %c\n",
                    INDICE_PREMIERE_LIGNE, INDICE_DERNIERE_LIGNE);
         } else{
             is_good--;
@@ -400,7 +399,7 @@ int colonne_utilisateur(){
         printf("Veuillez entrer le chiffre de la colonne de la case : ");
         scanf("%d", &deplacement_utilisateur_colonne);
         if(deplacement_utilisateur_colonne < INDICE_PREMIERE_COLONNE || deplacement_utilisateur_colonne > INDICE_DERNIERE_COLONNE){
-            printf("Vous avez entré un numéro de colonne invalide. Vous devez entrer un numéro entre %d et %d\n",
+            printf("Vous avez entre un numero de colonne invalide. Vous devez entrer un numero entre %d et %d\n",
                    INDICE_PREMIERE_COLONNE, INDICE_DERNIERE_COLONNE);
         }
         else{
@@ -414,8 +413,7 @@ int colonne_utilisateur(){
 /**
  * Précondition : /
  * Postcondition : /
- * Resultat : retourne une coordonnée valide saisie par l'utilisateur. Valide car les deux fonction
- *            ligne_utilisateur et colonne_utilisateur verifie l'entrée de l'utilisateur
+ * Resultat : retourne une coordonnée valide saisie par l'utilisateur
  */
 coordonnee saisie_utilisateur(){
     coordonnee cor = {0,0};
@@ -428,7 +426,7 @@ coordonnee saisie_utilisateur(){
 /**
  * Précondition : parking est initialisé
  * Postcondition : parking est inchangé
- * Résultat : initialise et retourne un deplacement saisi par l'utilisateur
+ * Résultat : retourne un deplacement saisi par l'utilisateur
  */
 deplacement init_deplacement(plateau * parking){
     deplacement dep;
@@ -442,8 +440,8 @@ deplacement init_deplacement(plateau * parking){
         conversion_coordonee(vehicule_a_deplacer, &ligne, &colonne);
 
         if(case_contient(parking, ligne, colonne, ' ')){
-            printf("\nAttention: vous avez entre une case qui est vide\n");
-            printf("Pour déplacer un véhicule sur une case, il faut choisir un vehicule\n\n");
+            printf("\nAttention: vous avez entre les coordonnees d'une case vide\n");
+            printf("Pour deplacer un vehicule sur une case, il faut choisir un vehicule\n\n");
         } else{
             est_valide--;
         }
@@ -456,14 +454,14 @@ deplacement init_deplacement(plateau * parking){
     est_valide = 1;
     coordonnee nouvel_emplacement;
     while (est_valide){
-        printf("Vous devez saisir une case vide ou vous souhaitez deplacer le vehicule choisi.\n");
+        printf("Vous devez saisir une case vide à l'emplacement ou vous souhaitez deplacer le vehicule choisi.\n");
         nouvel_emplacement = saisie_utilisateur();
 
         conversion_coordonee(nouvel_emplacement, &ligne, &colonne);
 
         if(case_contient(parking, ligne, colonne, dep.symbole) && case_contient(parking, ligne, colonne, ' ')){
             printf("\nAttention: vous avez entre une case qui contient un vehicule different de celui que vous souhaitez deplace\n");
-            printf("Pour déplacer un véhicule sur une case, il faut que cette case soit libre ou \nqu'elle contiennent le symbole du véhicule que vous souhaitez déplacer\n\n");
+            printf("Pour deplacer un vehicule sur une case, il faut que cette case soit libre ou \nqu'elle contienne le symbole du vehicule que vous souhaitez deplacer\n\n");
         } else{
             est_valide--;
         }
@@ -490,51 +488,26 @@ deplacement init_deplacement(plateau * parking){
 }
 
 /**
- * to do
+ * Précondition : dep et parking initialisés
+ * Postcondition : dep et parking inchangés
+ * Résultat : retourne 1 si le déplacement saisi par l'utilisateur est valide. Sinon, retourne -1
  */
 int deplacement_est_valide(deplacement * dep, plateau * parking){
     int est_valide = 1;
-    //Premiere verif
-    //sens de déplacement doit être le meme que le véhicule en question
+
     int indice = indice_voiture_recherche(parking, dep->symbole);
     if(dep->sens_dep != parking->liste_vehicule[indice].sens_vehicule){
         est_valide = -1;
     }
-    /*deuxieme verif
-    //voir si les autres cases qui sont derriere celle d'arrive sont vides ou contiene le meme symbole
-    //verifier les cases d'arriver pour ne pas se chevaucher
-    int ligne_verif = 0;
-    int colonne_verif = 0;
-    conversion_coordonee(dep->case_arrivee, &ligne_verif, &colonne_verif);
-    if(dep->sens_dep == 'H'){
-        while (colonne_verif < dep->case_debut.colonne - 1){
-            printf("Coucou je suis dans boucle %c qui ne marche pas.\n", dep->sens_dep);
-            if(case_contient(parking, ligne_verif, colonne_verif, ' ') == 0){
-                est_valide = -2;
-            }
-            else{
-                colonne_verif--;
-            }
-        }
-    } else {
-        while (ligne_verif < dep->case_debut.ligne - 1){
-            printf("Coucou je suis dans boucle %c qui ne marche pas.\n", dep->sens_dep);
-            if(case_contient(parking, ligne_verif, colonne_verif, ' ') == 0){
-                est_valide = -2;
-            }else{
-                ligne_verif--;
-            }
-        }
-    }*/
+
     return est_valide;
 }
 
 /**
- * Précondition : d, parking et symbole sont initialisé
- * Postcondition : EN GROS on rempli avec du vide derriere la case_debut du deplacement pour vider les emplacement sinon
- *                 on rempli avec le symbole du deplacement derriere la case_arrivee
+ * Précondition : d, parking et symbole sont initialisés
+ * Postcondition : la matrice de parking est modifiée en fonction du déplacement souhaité par l'utilisateur
  */
-void remplir(deplacement * d, plateau * parking, char symbole){
+void remplir_matrice(deplacement * d, plateau * parking, char symbole){
     if(symbole == ' '){
         conversion_coordonee(d->case_debut, &ligne, &colonne);
     } else{
@@ -581,13 +554,11 @@ void remplir(deplacement * d, plateau * parking, char symbole){
 
 /**
  * Précondition : dep est initialisé
- * Postcontion : la case_arrivee et case_debut de dep est converti dans de nouvelle coordonnées pour respecter
- *               le choix de deplacement du joueur est le mettre dans le bon format pour nous permettre de verifier l'arrire des deux cases
- *               Ex : Si le jouer entre case_debut : E5 et case_arrivee : C5 la fontion le converti en case_debut : C5 et case_arrivee : A5
- *               pour verifier l'arriere des cases
+ * Postcontion : dep est modifié. dep.case_debut et dep.case_fin contiennent les coordonnées de début et de fin de l'emplacement saisi par l'utilisateur.
+ *               Cet emplacement correspond aux cases où est déplacé le véhicule
  */
-void converions_depl(deplacement * dep){
-    int ecart;
+void conversions_dep(deplacement * dep){
+    int ecart = -1;
     if(dep->sens_dep == 'H'){
         ecart = dep->case_arrivee.colonne - dep->case_debut.colonne;
         dep->case_debut = dep->case_arrivee;
@@ -604,40 +575,38 @@ void converions_depl(deplacement * dep){
 }
 
 /**
- * Précondition : dep et parking sont initialisé
- * Postcondition : le parking change en fonction de dep, qui est le deplacement qu'on réalise
+ * Précondition : dep et parking sont initialisés
+ * Postcondition : parking change en fonction de dep, dep est le deplacement qui est realise
  */
 void effectuer_deplacement(deplacement * dep, plateau * parking){
-    int tmp;
+    int tmp = 0;
     do{
         *dep = init_deplacement(parking);
-        //conversion si besoin
+
         if(dep->sens_dep == 'H' && dep->case_debut.colonne == INDICE_PREMIERE_COLONNE){
-            converions_depl(dep);
+            conversions_dep(dep);
         } else if(dep->sens_dep == 'H' && dep->case_debut.colonne == INDICE_DERNIERE_COLONNE) {
-            converions_depl(dep);
+            conversions_dep(dep);
         } else if(dep->sens_dep == 'V' && dep->case_debut.ligne == INDICE_PREMIERE_LIGNE){
-            converions_depl(dep);
+            conversions_dep(dep);
         } else if(dep->sens_dep == 'V' && dep->case_debut.ligne == INDICE_DERNIERE_LIGNE) {
-            converions_depl(dep);
+            conversions_dep(dep);
         }
 
-        //verification
         tmp = deplacement_est_valide(dep, parking);
         vider_tampon_stdin();
-        //trouver la raison et faire un message d'erreur en fonction DONC plusieurs code erreurs
+
         if (tmp == -1) {
             printf("Le deplacement ne peut s'effectuer car vous essayez de deplacer la voiture dans le sens opposé du vehicule.\n");
-        } else if(tmp == -2) {
-            printf("Le deplacement ne peut s'effectuer car vous essayez de deplacer la voiture sur une case deja occupé par un vehicule.\n");
         }
+
         pause();
         afficher_vide();
         afficher_matrice(parking);
     }while (tmp < 0);
     //realisation du deplacement
-    remplir(dep, parking, ' ');
-    remplir(dep, parking, dep->symbole);
+    remplir_matrice(dep, parking, ' ');
+    remplir_matrice(dep, parking, dep->symbole);
 
     printf("Deplacement reussi\n");
     pause();
@@ -670,7 +639,7 @@ void deroulement_partie(void) {
     }
     afficher_vide();
     afficher_matrice(&parking);
-    printf("Bravo vous avez gagné avec %d coups. Le nombre coups minimum pour ce plateau est de %d", nbCoupJ, parking.nb_min_coups);
+    printf("Bravo, vous avez gagné avec %d coups. Le nombre de coups minimum pour ce plateau est de %d", nbCoupJ, parking.nb_min_coups);
     pause();
 }
 
@@ -697,6 +666,6 @@ int main(void){
         vider_tampon_stdin();
         afficher_vide();
     }
-    printf("\nMerci d'avoir joué au Rush Hour ! \n");
+    printf("\nMerci d'avoir joue au Rush Hour ! \n");
     return EXIT_SUCCESS;
 }
