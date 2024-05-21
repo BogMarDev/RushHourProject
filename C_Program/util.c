@@ -52,28 +52,44 @@ boolean is_between_limits(int number, int min, int max){
     return is_ok;
 }
 
-void lire_entier_dans(FILE *file, int * number){
-    if(fscanf(file,"%d", number) != 1){
+void lire_entier_dans(FILE *file, int *nombre) {
+    // Tente de lire un entier depuis le fichier
+    if (fscanf(file, "%d", nombre) != 1) {
         perror("Erreur lors de la lecture de l'entier");
         exit(EXIT_FAILURE);
     }
-    char tampon = getc(file); //' ' || '\n'
+
+    // Lecture des deux prochains caractères (y compris les espaces possibles)
+    int premier_char = getc(file);
+    if (premier_char == 13) {
+        int second_char = getc(file);
+        if(second_char == 10){ //Ce if ne sert a rien c'est simplement pour ne pas avoir une erreur inutile lors de la compilation
+        }
+    }
 }
+
 
 long int find_position_with_string(FILE *flux, char * string_to_find, int limite){
     char buffer[255];
     int estTrouve = 0;
+    char * line = NULL;
     for (int i = 0; i < limite && !estTrouve; i++) {
-        char * line = fgets(buffer,255, flux);
+        line = fgets(buffer,255, flux);
+        //printf("Line %d : %s", i+1, line);
         if(strcmp(string_to_find, line) == 0){
             estTrouve = 1;
         }
-        free(line);
+        //free(line);
         line = NULL;
     }
 
     long int position_flux = ftell(flux);
     return position_flux;
+}
+
+void changer_position_pointeur_dans(FILE * file, int offset, int origin){
+    fflush(file);
+    fseek(file, offset, origin);
 }
 
 int countLines(FILE *fichier, long debut, long fin) {
@@ -97,12 +113,9 @@ int countLines(FILE *fichier, long debut, long fin) {
         count++;
     }
 
-    return count;
-}
+    changer_position_pointeur_dans(fichier, debut, SEEK_SET);
 
-void changer_position_pointeur_dans(FILE * file, int offset, int origin){
-    fflush(file);
-    fseek(file, offset, origin);
+    return count;
 }
 
 void determiner_taille(vehicule * v){
@@ -119,4 +132,50 @@ void determiner_sens(vehicule * v){
     } else{
         v->sens_vehicule = 'V';
     }
+}
+
+/**
+ * Précondition : coord initialisé.
+ * Postcondition : coord inchangé. Convertit ligne en un entier. ligne = coord.ligne - 65 et colonne = coord.colonne - 1
+ */
+void conversion_coordonee(coordonnee coord, int * ligne, int * colonne){
+    *ligne = coord.ligne - 65;
+    *colonne = coord.colonne - 1;
+}
+
+/**
+ * Précondition : camion est un véhicule initialisé
+ * Postcondition : camion inchangé
+ * Résultat : retourne une coordonnée contenant la lettre de la ligne et le numero de la colonne
+ *            de la case du milieu d'un camion
+ */
+coordonnee trouver_centre_camion(vehicule * camion) {
+    coordonnee milieu = {0, 0};
+    if (camion->debut.ligne == camion->fin.ligne) {
+        milieu.ligne = camion->debut.ligne;
+        milieu.colonne = camion->debut.colonne + 1;
+    } else {
+        milieu.ligne = camion->debut.ligne + 1;
+        milieu.colonne = camion->debut.colonne;
+    }
+    return milieu;
+}
+
+int indice_voiture_recherche(plateau * parking, char symbole_a_rechercher){
+    boolean est_trouve = false;
+    int indice = 0;
+    while (indice < parking->nb_total_vehicule && !est_trouve) {
+        if(symbole_a_rechercher == parking->liste_vehicule[indice].symbole) {
+            est_trouve = true;
+        }
+        else{
+            indice++;
+        }
+    }
+
+    if(!est_trouve){
+        indice = -1;
+    }
+
+    return indice;
 }

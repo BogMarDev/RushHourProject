@@ -31,10 +31,9 @@ typedef struct{
 }plateau;
 
 typedef struct {
-    int nb_cases;
     vehicule * vehicule_a_deplacer;
-    int delta_x; //changer
-    int delta_y; //changer
+    int ecart_horizontal;
+    int ecart_vertical;
 }deplacement;
 
 typedef struct {

@@ -15,9 +15,10 @@ void afficher_vide(void){
  * Postcondition : affiche l'écran de lancement d'une partie
  */
 void afficher_ecran_lancement_partie(void){
-    FILE *flux = fopen("..\\Files\\splash_screen.txt", "r");
+    char filename[] = "../Files/splash_screen.txt";
+    FILE *flux = fopen(filename, "r");
     if(flux == NULL){
-        printf("Impossible d'ouvrir/créer le fichier : ");
+        printf("Impossible d'ouvrir/créer le fichier %s", filename);
         exit(EXIT_FAILURE);
     }
 
