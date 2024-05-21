@@ -50,6 +50,7 @@ deplacement * creer_deplacement(plateau * plateau1) {
  * @param nouvelle_ligne Nouvelle coordonnée ligne après déplacement.
  * @return true si les coordonnées sont dans les limites de la grille, false sinon.
  */
+ //a tester
 boolean dans_limites_grille(plateau *plat, vehicule vehicule_a_deplacer, int nouvelle_colonne, int nouvelle_ligne) {
     boolean est_dans_limites = true;
 
@@ -75,6 +76,7 @@ boolean dans_limites_grille(plateau *plat, vehicule vehicule_a_deplacer, int nou
  * @param nouvelle_ligne Nouvelle coordonnée ligne après déplacement.
  * @return true s'il y a une collision, false sinon.
  */
+ //a tester
 boolean collision_detectee(plateau *plat, vehicule vehicule_a_deplacer, int nouvelle_colonne, int nouvelle_ligne) {
     boolean collision = false;
 
