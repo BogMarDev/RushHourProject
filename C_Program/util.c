@@ -51,9 +51,8 @@ boolean est_entre_limites(int number, int min, int max){
 }
 
 /**
- *
- * @param file
- * @param nombre
+ * Précondition : file et nombre sont initalisé
+ * Postcondition : file reste inchangé mais nombre est initialisé avec le nombre récuperé dans le fichier
  */
 void lire_entier_dans(FILE *file, int *nombre) {
     // Tente de lire un entier depuis le fichier
@@ -71,11 +70,9 @@ void lire_entier_dans(FILE *file, int *nombre) {
 }
 
 /**
- *
- * @param flux
- * @param string_to_find
- * @param limite
- * @return
+ * Précondition : flux, string_to_find et limite sont initialisé
+ * Postcondition : flux, string_to_find et limite reste inchangé
+ * Resultat : recherche dans un fichier une chaine de caratere et retourne la position du pointeur a l'emplacement trouvé
  */
 long int trouver_position_avec_string(FILE *flux, char * string_to_find, int limite){
     char buffer[255];
@@ -94,10 +91,8 @@ long int trouver_position_avec_string(FILE *flux, char * string_to_find, int lim
 }
 
 /**
- *
- * @param file
- * @param offset
- * @param origin
+ * Précondition : file, offset et origin sont initalisé
+ * Postcondition : change la position du pointeur dans un fichier
  */
 void changer_position_pointeur_dans(FILE * file, int offset, int origin){
     fflush(file);
@@ -105,11 +100,9 @@ void changer_position_pointeur_dans(FILE * file, int offset, int origin){
 }
 
 /**
- *
- * @param fichier
- * @param debut
- * @param fin
- * @return
+ * Précondition : fichier, debut et fin sont initialisé
+ * Postcondition : fichier, debut et fin reste inchangé
+ * Resultat: le nombre de lignes entre le debut et la fin passé en paramètre
  */
 int compteur_lignes(FILE *fichier, long debut, long fin) {
     int count = 0;
@@ -141,8 +134,8 @@ int compteur_lignes(FILE *fichier, long debut, long fin) {
 
 //A tester
 /**
- *
- * @param v
+ * Précondition : v est initialisé
+ * Postcondition : la taille du vehicule est calculé (taille possible 2 ou 3)
  */
 void determiner_taille(vehicule * v){
     if(v->sens_vehicule == 'H'){
@@ -154,8 +147,8 @@ void determiner_taille(vehicule * v){
 
 // A TESTER
 /**
- *
- * @param v
+ * Précondition : v est initialisé
+ * Postcondition : le sens du vehicule est choisi (sens possible 'H' pour horizontal ou 'V' pour vertical)
  */
 void determiner_sens(vehicule * v){
     if(v->debut.ligne == v->fin.ligne){
@@ -194,10 +187,9 @@ coordonnee trouver_centre_camion(vehicule * camion) {
 
 // A TESTER
 /**
- *
- * @param parking
- * @param symbole_a_rechercher
- * @return
+ * Précondition : parking et symbole_a_rechercher sont initialisé
+ * Postcondition : parking et symbole_a_rechercher reste inchangé
+ * Resultat : l'indice du symbole qu'on recherche, si ce symbole n'existe pas dans la liste retourne -1
  */
 int indice_voiture_recherche(plateau * parking, char symbole_a_rechercher){
     boolean est_trouve = false;

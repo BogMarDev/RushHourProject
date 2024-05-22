@@ -8,9 +8,9 @@
  * Postcondition : parking est inchangé
  * Résultat : retourne un deplacement saisi par l'utilisateur
 */
-deplacement * creer_deplacement(plateau * plateau1) {
-    deplacement *dep = malloc(sizeof(deplacement));
-    if(dep == NULL){
+deplacement * creer_deplacement(plateau * parking) {
+    deplacement *deplacement_a_realiser = malloc(sizeof(deplacement));
+    if(deplacement_a_realiser == NULL){
         printf("Erreur : la mémoire n'as pas pu etre alloué\n");
         exit(EXIT_FAILURE);
     }
@@ -21,34 +21,30 @@ deplacement * creer_deplacement(plateau * plateau1) {
         char symbole = 0;
         printf("Entrez le symbole du vehicule que vous voulez deplacer : ");
         scanf("%c", &symbole);
-        index = indice_voiture_recherche(plateau1, symbole);
+        index = indice_voiture_recherche(parking, symbole);
     } while (index == -1);
 
-    dep->vehicule_a_deplacer = &plateau1->liste_vehicule[index];
+    deplacement_a_realiser->vehicule_a_deplacer = &parking->liste_vehicule[index];
 
-    dep->ecart_horizontal = 0;
-    dep->ecart_vertical = 0;
+    deplacement_a_realiser->ecart_horizontal = 0;
+    deplacement_a_realiser->ecart_vertical = 0;
 
-    if (dep->vehicule_a_deplacer->sens_vehicule == 'H') {
+    if (deplacement_a_realiser->vehicule_a_deplacer->sens_vehicule == 'H') {
         printf("Entrez le nombre de cases à déplacer horizontalement (positif pour droite, négatif pour gauche) : ");
-        scanf("%d", &dep->ecart_horizontal);
+        scanf("%d", &deplacement_a_realiser->ecart_horizontal);
     } else {
         printf("Entrez le nombre de cases à déplacer verticalement (positif pour haut, négatif pour bas) : ");
-        scanf("%d", &dep->ecart_vertical);
-        dep->ecart_vertical = -(dep->ecart_vertical);
+        scanf("%d", &deplacement_a_realiser->ecart_vertical);
+        deplacement_a_realiser->ecart_vertical = -(deplacement_a_realiser->ecart_vertical);
     }
 
-    return dep;
+    return deplacement_a_realiser;
 }
 
 /**
- * Vérifie si les nouvelles coordonnées du véhicule sont dans les limites de la grille.
- *
- * @param plat Pointeur vers la structure plateau contenant les informations sur la grille et les véhicules.
- * @param vehicule_a_deplacer Structure vehicule représentant le véhicule à déplacer.
- * @param nouvelle_colonne Nouvelle coordonnée colonne après déplacement.
- * @param nouvelle_ligne Nouvelle coordonnée ligne après déplacement.
- * @return true si les coordonnées sont dans les limites de la grille, false sinon.
+ * Précondition : plat, vehicule_a_deplacer, nouvelle_colonne et nouvelle_ligne sont initialisé
+ * Postcondition : plat, vehicule_a_deplacer, nouvelle_colonne et nouvelle_ligne reste inchangé
+ * Resultat : true si les nouvelles coordonnées du véhicule sont dans les limites de la grille, false sinon.
  */
  //a tester
 boolean dans_limites_grille(plateau *plat, vehicule vehicule_a_deplacer, int nouvelle_colonne, int nouvelle_ligne) {
@@ -68,13 +64,9 @@ boolean dans_limites_grille(plateau *plat, vehicule vehicule_a_deplacer, int nou
 }
 
 /**
- * Vérifie s'il y a une collision avec d'autres véhicules aux nouvelles coordonnées.
- *
- * @param plat Pointeur vers la structure plateau contenant les informations sur la grille et les véhicules.
- * @param vehicule_a_deplacer Structure vehicule représentant le véhicule à déplacer.
- * @param nouvelle_colonne Nouvelle coordonnée colonne après déplacement.
- * @param nouvelle_ligne Nouvelle coordonnée ligne après déplacement.
- * @return true s'il y a une collision, false sinon.
+ * Précondition : plat, vehicule_a_deplacer, nouvelle_colonne et nouvelle_ligne sont initialisé
+ * Postcondition : plat, vehicule_a_deplacer, nouvelle_colonne et nouvelle_ligne reste inchangé
+ * Resultat : true s'il y a une collision avec d'autres véhicules aux nouvelles coordonnées, false sinon.
  */
  //a tester
 boolean collision_detectee(plateau *plat, vehicule vehicule_a_deplacer, int nouvelle_colonne, int nouvelle_ligne) {
@@ -108,11 +100,9 @@ boolean collision_detectee(plateau *plat, vehicule vehicule_a_deplacer, int nouv
 }
 
 /**
- * Vérifie si un déplacement de véhicule est possible sur la grille.
- *
- * @param plat Pointeur vers la structure plateau contenant les informations sur la grille et les véhicules.
- * @param deplace Structure deplacement représentant le déplacement à effectuer.
- * @return true si le déplacement est possible, false sinon.
+ * Précondition : plat et deplace sont initalisé
+ * Postcondition : plat et deplace reste inchangé
+ * Resultat : true si un déplacement de véhicule est possible sur la grille, false sinon.
  */
 boolean deplacement_est_valide(plateau *plat, deplacement *deplace) {
     boolean est_valide = true;
@@ -146,18 +136,18 @@ boolean deplacement_est_valide(plateau *plat, deplacement *deplace) {
 }
 
 /**
- * Déplace un véhicule sur la grille.
- *
- * @param plat Pointeur vers la structure plateau contenant les informations sur la grille et les véhicules.
- * @param deplace Structure deplacement représentant le déplacement à effectuer.
+ * Précondition : parking et depl sont initialisé
+ * Postcondition : deplace un vehicule sur la grille de jeu c'est-à-dire on fait un shift vers la droite ou la gauche
+ *                 si le vehicule est horizontal et de haut en bas pour les vehicules verticaux. Il faut imaginer
+ *                 le vehicule sur un répere orthonormé où on le deplacé et l'emplacement de départ ou il est c'est l'origine
  */
-void deplacer_vehicule(plateau *plat, deplacement * deplace) {
-    while (!deplacement_est_valide(plat, deplace)) {
+void deplacer_vehicule(plateau *parking, deplacement * depl) {
+    while (!deplacement_est_valide(parking, depl)) {
         printf("Déplacement impossible.\n");
         printf("Veuillez refaire le déplacement.\n");
-        deplace = creer_deplacement(plat);
+        depl = creer_deplacement(parking);
     }
-    vehicule * vehicule_a_deplacer = deplace->vehicule_a_deplacer;
+    vehicule * vehicule_a_deplacer = depl->vehicule_a_deplacer;
 
     int ligne, colonne = 0;
     conversion_coordonee(vehicule_a_deplacer->debut, &ligne, &colonne);
@@ -165,17 +155,17 @@ void deplacer_vehicule(plateau *plat, deplacement * deplace) {
     // Effacement de l'ancienne position
     if (vehicule_a_deplacer->sens_vehicule == 'H') {
         for (int i = 0; i < vehicule_a_deplacer->taille; i++) {
-            plat->matrice[ligne][colonne + i] = ' ';
+            parking->matrice[ligne][colonne + i] = ' ';
         }
     } else {
         for (int i = 0; i < vehicule_a_deplacer->taille; i++) {
-            plat->matrice[ligne + i][colonne] = ' ';
+            parking->matrice[ligne + i][colonne] = ' ';
         }
     }
 
     // Mise à jour des coordonnées du véhicule
-    colonne += deplace->ecart_horizontal;
-    ligne += deplace->ecart_vertical;
+    colonne += depl->ecart_horizontal;
+    ligne += depl->ecart_vertical;
     vehicule_a_deplacer->debut.ligne = ligne + 65;
     vehicule_a_deplacer->debut.colonne = colonne + 1;
     if (vehicule_a_deplacer->sens_vehicule == 'H') {
@@ -190,14 +180,13 @@ void deplacer_vehicule(plateau *plat, deplacement * deplace) {
     // Mise à jour de la nouvelle position
     if (vehicule_a_deplacer->sens_vehicule == 'H') {
         for (int i = 0; i < vehicule_a_deplacer->taille; i++) {
-            plat->matrice[ligne][colonne + i] = vehicule_a_deplacer->symbole;
+            parking->matrice[ligne][colonne + i] = vehicule_a_deplacer->symbole;
         }
     } else {
         for (int i = 0; i < vehicule_a_deplacer->taille; i++) {
-            plat->matrice[ligne + i][colonne] = vehicule_a_deplacer->symbole;
+            parking->matrice[ligne + i][colonne] = vehicule_a_deplacer->symbole;
         }
     }
 
     vehicule_a_deplacer = NULL;
 }
-
