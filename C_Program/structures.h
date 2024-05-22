@@ -41,6 +41,6 @@ typedef struct {
     int carte_id;
     int nb_coups_min;
     int nb_coups_joueur;
-}score; //Censé etre utilisé pour l'historique
+}score;
 
 #endif

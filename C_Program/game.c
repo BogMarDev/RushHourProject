@@ -143,7 +143,7 @@ plateau * creer_parking_defaut(char filename[]){
     determiner_sens(&voiture_rouge);
 
     //Sauvegarde de la postition du pointeur dans le fichier juste apres la lecture des coordonnées de la voiture rouge
-    //pour compter le nombre de voitur
+    //pour compter le nombre de voiture.
     long int debut_flux = ftell(f);
 
     //Si choix_carte = derniere carte alors on va aller directement à la fin du fichier
@@ -202,7 +202,6 @@ plateau * creer_parking_defaut(char filename[]){
  * Précondition : parking et dep sont initialisé
  * Postcondition : parking et dep reste inchangé
  * Résultat : retourne true si la sortie est atteinte, false sinon
- * A TESTER
 */
 boolean verifier_victoire(plateau * parking, deplacement * dep){
     int ligne_fin_voiture_rouge, colonne_fin_voiture_rouge = 0;
@@ -237,7 +236,7 @@ char * choisir_difficulte(void){
         vider_tampon_stdin();
     } while (!est_entre_limites(choix_difficulte, 1, 4));
 
-    char * filename = malloc(36); //36 car taille du plus grand nom
+    char * filename = malloc(36); //36 car taille du plus grand nom de fichier
 
     switch (choix_difficulte) {
         case 1: strcpy(filename, "../Files/rushHourDebutant.txt"); break;

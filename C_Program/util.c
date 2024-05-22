@@ -35,15 +35,14 @@ void pause(void){
 }
 
 /**
- * Précondition : number, min, max sont initalisé
- * Postcondition : number, min, max reste inchangé
+ * Précondition : nombre, min, max sont initalisé
+ * Postcondition : nombre, min, max reste inchangé
  * Resultat : true si le nombre est compris entre le min et le max false sinon
- * A TESTER
 */
-boolean est_entre_limites(int number, int min, int max){
+boolean est_entre_limites(int nombre, int min, int max){
     boolean is_ok = true;
 
-    if(number < min || number > max){
+    if(nombre < min || nombre > max){
         is_ok = false;
     }
 
@@ -51,52 +50,52 @@ boolean est_entre_limites(int number, int min, int max){
 }
 
 /**
- * Précondition : file et nombre sont initalisé
- * Postcondition : file reste inchangé mais nombre est initialisé avec le nombre récuperé dans le fichier
+ * Précondition : fichier et nombre sont initalisé
+ * Postcondition : fichier reste inchangé mais nombre est initialisé avec le nombre récuperé dans le fichier
  */
-void lire_entier_dans(FILE *file, int *nombre) {
+void lire_entier_dans(FILE *fichier, int *nombre) {
     // Tente de lire un entier depuis le fichier
-    if (fscanf(file, "%d", nombre) != 1) {
+    if (fscanf(fichier, "%d", nombre) != 1) {
         perror("Erreur lors de la lecture de l'entier");
         exit(EXIT_FAILURE);
     }
 
     // Lecture des deux prochains caractères (y compris les espaces possibles)
-    int premier_char = getc(file);
+    int premier_char = getc(fichier);
     if (premier_char == 13) {
-        int second_char = getc(file); //utile pour récuper le deuxieme caractere de fin de ligne
+        int second_char = getc(fichier); //utile pour récuper le deuxieme caractere de fin de ligne
         if(second_char == 10){} //Ce if ne sert a rien c'est simplement pour ne pas avoir une erreur lors de la compilation
     }
 }
 
 /**
- * Précondition : flux, string_to_find et limite sont initialisé
- * Postcondition : flux, string_to_find et limite reste inchangé
+ * Précondition : fichier, string_a_chercher et limite sont initialisé
+ * Postcondition : fichier, string_a_chercher et limite reste inchangé
  * Resultat : recherche dans un fichier une chaine de caratere et retourne la position du pointeur a l'emplacement trouvé
  */
-long int trouver_position_avec_string(FILE *flux, char * string_to_find, int limite){
+long int trouver_position_avec_string(FILE *fichier, char * string_a_chercher, int limite){
     char buffer[255];
     int estTrouve = 0;
     char * line = NULL;
     for (int i = 0; i < limite && !estTrouve; i++) {
-        line = fgets(buffer,255, flux);
-        if(strcmp(string_to_find, line) == 0){
+        line = fgets(buffer,255, fichier);
+        if(strcmp(string_a_chercher, line) == 0){
             estTrouve = 1;
         }
         line = NULL;
     }
-    long int position_flux = ftell(flux);
+    long int position_flux = ftell(fichier);
 
     return position_flux;
 }
 
 /**
- * Précondition : file, offset et origin sont initalisé
+ * Précondition : fichier, offset et origin sont initalisé
  * Postcondition : change la position du pointeur dans un fichier
  */
-void changer_position_pointeur_dans(FILE * file, int offset, int origin){
-    fflush(file);
-    fseek(file, offset, origin);
+void changer_position_pointeur_dans(FILE * fichier, int offset, int origin){
+    fflush(fichier);
+    fseek(fichier, offset, origin);
 }
 
 /**
@@ -126,13 +125,12 @@ int compteur_lignes(FILE *fichier, long debut, long fin) {
         count++;
     }
 
-    //Replace le pointeur dans le fichier ou il etait avant le comptage
+    //Replace le pointeur dans le fichier où il etait avant le comptage
     changer_position_pointeur_dans(fichier, debut, SEEK_SET);
 
     return count;
 }
 
-//A tester
 /**
  * Précondition : v est initialisé
  * Postcondition : la taille du vehicule est calculé (taille possible 2 ou 3)
@@ -145,7 +143,6 @@ void determiner_taille(vehicule * v){
     }
 }
 
-// A TESTER
 /**
  * Précondition : v est initialisé
  * Postcondition : le sens du vehicule est choisi (sens possible 'H' pour horizontal ou 'V' pour vertical)
@@ -185,7 +182,6 @@ coordonnee trouver_centre_camion(vehicule * camion) {
     return milieu;
 }
 
-// A TESTER
 /**
  * Précondition : parking et symbole_a_rechercher sont initialisé
  * Postcondition : parking et symbole_a_rechercher reste inchangé

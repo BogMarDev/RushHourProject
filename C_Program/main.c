@@ -15,7 +15,7 @@ int main(void){
     srand(time(NULL));
 
     afficher_vide();
-    printf("Bienvenue dans le jeu du rush hour\n\n");
+    printf("Bienvenue dans le jeu du rush Hour\n\n");
 
     boolean is_finish = true;
     while (is_finish){

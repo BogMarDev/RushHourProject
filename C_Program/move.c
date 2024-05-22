@@ -46,7 +46,6 @@ deplacement * creer_deplacement(plateau * parking) {
  * Postcondition : plat, vehicule_a_deplacer, nouvelle_colonne et nouvelle_ligne reste inchangé
  * Resultat : true si les nouvelles coordonnées du véhicule sont dans les limites de la grille, false sinon.
  */
- //a tester
 boolean dans_limites_grille(plateau *plat, vehicule vehicule_a_deplacer, int nouvelle_colonne, int nouvelle_ligne) {
     boolean est_dans_limites = true;
 
@@ -68,7 +67,6 @@ boolean dans_limites_grille(plateau *plat, vehicule vehicule_a_deplacer, int nou
  * Postcondition : plat, vehicule_a_deplacer, nouvelle_colonne et nouvelle_ligne reste inchangé
  * Resultat : true s'il y a une collision avec d'autres véhicules aux nouvelles coordonnées, false sinon.
  */
- //a tester
 boolean collision_detectee(plateau *plat, vehicule vehicule_a_deplacer, int nouvelle_colonne, int nouvelle_ligne) {
     boolean collision = false;
 
@@ -107,26 +105,26 @@ boolean collision_detectee(plateau *plat, vehicule vehicule_a_deplacer, int nouv
 boolean deplacement_est_valide(plateau *plat, deplacement *deplace) {
     boolean est_valide = true;
 
-    // Vérification de la validité de la direction de déplacement
+    //Vérification de la validité de la direction de déplacement
     if ((deplace->vehicule_a_deplacer->sens_vehicule == 'H' && deplace->ecart_vertical != 0) ||
         (deplace->vehicule_a_deplacer->sens_vehicule == 'V' && deplace->ecart_horizontal != 0)) {
         printf("Erreur : Déplacement impossible dans cette direction.\n");
         est_valide = false;
     }
 
-    // Calcul des nouvelles coordonnées après le déplacement
+    //Calcul des nouvelles coordonnées après le déplacement
     int ligne, colonne = 0;
     conversion_coordonee(deplace->vehicule_a_deplacer->debut, &ligne, &colonne);
     int nouvelle_colonne = colonne + deplace->ecart_horizontal;
     int nouvelle_ligne = ligne + deplace->ecart_vertical;
 
-    // Vérification des limites de la grille
+    //Vérification des limites de la grille
     if (est_valide && !dans_limites_grille(plat, *deplace->vehicule_a_deplacer, nouvelle_colonne, nouvelle_ligne)) {
         printf("Erreur : Déplacement en dehors des limites de la grille.\n");
         est_valide = false;
     }
 
-    // Vérification des collisions avec d'autres véhicules
+    //Vérification des collisions avec d'autres véhicules
     if (est_valide && collision_detectee(plat, *deplace->vehicule_a_deplacer, nouvelle_colonne, nouvelle_ligne)) {
         printf("Erreur : La position cible est occupée.\n");
         est_valide = false;
@@ -152,7 +150,7 @@ void deplacer_vehicule(plateau *parking, deplacement * depl) {
     int ligne, colonne = 0;
     conversion_coordonee(vehicule_a_deplacer->debut, &ligne, &colonne);
 
-    // Effacement de l'ancienne position
+    //Effacement de l'ancienne position
     if (vehicule_a_deplacer->sens_vehicule == 'H') {
         for (int i = 0; i < vehicule_a_deplacer->taille; i++) {
             parking->matrice[ligne][colonne + i] = ' ';
@@ -163,7 +161,7 @@ void deplacer_vehicule(plateau *parking, deplacement * depl) {
         }
     }
 
-    // Mise à jour des coordonnées du véhicule
+    //Mise à jour des coordonnées du véhicule
     colonne += depl->ecart_horizontal;
     ligne += depl->ecart_vertical;
     vehicule_a_deplacer->debut.ligne = ligne + 65;
@@ -177,7 +175,7 @@ void deplacer_vehicule(plateau *parking, deplacement * depl) {
         vehicule_a_deplacer->fin.colonne = vehicule_a_deplacer->debut.colonne;
     }
 
-    // Mise à jour de la nouvelle position
+    //Mise à jour de la nouvelle position
     if (vehicule_a_deplacer->sens_vehicule == 'H') {
         for (int i = 0; i < vehicule_a_deplacer->taille; i++) {
             parking->matrice[ligne][colonne + i] = vehicule_a_deplacer->symbole;
